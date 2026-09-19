@@ -27,7 +27,14 @@ const title = `${SITE.name} — Make any image fit the exact requirement`;
         Any supported format — detected instantly, then pick the right tool. Or browse everything below.
       </p>
     </div>
-    <input type="file" class="visually-hidden" data-home-input accept="image/*,.heic,.heif" />
+    <input
+      type="file"
+      class="visually-hidden"
+      data-home-input
+      accept="image/*,.heic,.heif"
+      aria-label="Choose an image file to identify it and pick the right tool"
+      tabindex="-1"
+    />
     <div data-home-output hidden style="margin-top: var(--sp-4);"></div>
 
     <TrustStrip />
