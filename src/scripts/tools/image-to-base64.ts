@@ -28,15 +28,11 @@ export default function init(root: HTMLElement): void {
       await navigator.clipboard.writeText(text);
       setStatus(root, `${label} copied to the clipboard.`, 'success');
     } catch {
-      // Fallback for non-secure contexts.
+      // Clipboard API unavailable (non-secure context or permission denied): select the text so
+      // a single keypress copies it — no deprecated copy APIs involved.
       output!.focus();
       output!.select();
-      try {
-        document.execCommand('copy');
-        setStatus(root, `${label} copied to the clipboard.`, 'success');
-      } catch {
-        setStatus(root, 'Copying failed — select the text and copy it manually.', 'error');
-      }
+      setStatus(root, `${label} is selected — press Ctrl+C (⌘C on Mac) to copy it.`);
     }
   }
 
