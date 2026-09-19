@@ -46,7 +46,7 @@
 | No broken buttons | ✅ all primary actions exercised |
 | Pre-launch intent audit | ✅ 15 indexable pages + 404 audited; no competing intents (`docs/SEO_PAGE_REGISTRY.md`) |
 | Production verifier (dry-run) | ✅ `prod-check` exit 0 on dry-run build; exit 1 on mismatched origin (both executed) |
-| No unrelated project changes | ✅ single project workspace; 20 scoped commits |
+| No unrelated project changes | ✅ single project workspace; scoped commits only (see `git log`) |
 
 ---
 
@@ -97,4 +97,4 @@ node scripts/prod-check.mjs --origin https://<domain>   # verify a deployment (l
 
 ## Repository memory
 
-Committed history (20 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep → domain adoption → production deployment review → canonical alignment (www; live re-verified) → response-header hardening. No secrets, no env files, no external services, no analytics, no ads; the site is live (operator-deployed on Vercel, 2026-09-19).
+Committed history: research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep → domain adoption → production deployment review → canonical alignment (www; live re-verified) → response-header hardening. No secrets, no env files, no external services, no analytics, no ads; the site is live (operator-deployed on Vercel, 2026-09-19).
