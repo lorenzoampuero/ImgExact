@@ -40,8 +40,33 @@
 4. Cannibalization review: if an existing page could answer ≥80% of the query, the new content goes there instead.
 5. Titles/descriptions remain unique (unit-tested) and within snippet lengths.
 
+## Pre-launch intent audit (2026-09-19)
+
+Required before launch (external review): confirm that no two pages compete for the same query intent. Verdicts below cite the **functional** difference, not just wording. Copy (title/meta/H1) was checked against `src/data/tools.ts`; no metadata changes were needed.
+
+| # | Path | Verdict | Why it does not compete |
+|---|---|---|---|
+| 1 | `/` | DISTINCT | Discovery/launcher: identify a dropped file → route to a tool. No transactional intent of its own. |
+| 2 | `/compress-image-to-size` | DISTINCT | A **numeric constraint** (KB/MB target) drives the binary-search optimizer, dimension opt-in and convergence report. Problem: "portal rejects files over 50 KB". |
+| 3 | `/compress-image` | DISTINCT | **No target number**: quality modes (Light/Standard/Aggressive) with a before/after report; hands off to #2 when a number is needed (explicit FAQ + link). |
+| 4 | `/resize-image` | DISTINCT | Exact pixels/percent with an explicit output contract (fit / fill / stretch); framing preserved. |
+| 5 | `/convert-image` | DISTINCT | Format matrix incl. HEIC-read honesty; optional resize rides along in the same pass. |
+| 6 | `/crop-image` | DISTINCT | Changes **framing** (removes pixels outside a rectangle); crop-vs-resize difference is answered on-page. |
+| 7 | `/signature-resizer` | DISTINCT | Form/application constraints combined in one workflow (px + max KB + format + background color); country variants prohibited by design. |
+| 8 | `/social-image-resizer` | DISTINCT | Platform presets from a versioned, source-linked config; spec-freshness discipline is the differentiator. |
+| 9 | `/image-size-checker` | DISTINCT | Read-only inspection report (bytes, dims, ratio, MP, print size at 150/300 DPI, metadata presence). No output file. |
+| 10 | `/image-metadata` | DISTINCT | Privacy workflow: view → remove EXIF/GPS with before/after verification. |
+| 11 | `/image-dpi` | DISTINCT | Print math (px ÷ DPI) + density embedding (JFIF/pHYs); explicitly "marks density, adds no detail". Action tool vs #9's inspection role. |
+| 12 | `/image-to-base64` | DISTINCT | Developer encoding to Base64 / data URI, incl. size-overhead math and snippets. |
+| 13–15 | `/about`, `/privacy`, `/terms` | DISTINCT | Trust/legal intents; linked from everywhere, never targeted over tool queries. |
+
+Close pairs specifically reviewed: **#2 vs #3** (numeric constraint vs quality choice — distinct titles, metas and an on-page handoff), **#4 vs #6** (resize changes dimensions, crop changes framing), **#4 vs #7 vs #8** (generic vs form-spec vs platform-preset), **#9 vs #10 vs #11** (inspect vs privacy removal vs print actions).
+
+**Result: no competing pairs found. No URLs, titles or descriptions were changed by this audit.**
+
 ## Change log
 
 | Date | Change | Notes |
 |---|---|---|
 | 2026-09-19 | Initial registry (15 indexable URLs) | All pages created + verified in one build; placeholders: `SITE.url` origin (see `DEPLOYMENT.md`). |
+| 2026-09-19 | Pre-launch intent audit (15 indexable pages + 404) | Verdicts recorded above; no competing pairs; no URLs/titles/metas changed. |
