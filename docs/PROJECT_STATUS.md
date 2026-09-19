@@ -46,7 +46,7 @@
 | No broken buttons | ✅ all primary actions exercised |
 | Pre-launch intent audit | ✅ 15 indexable pages + 404 audited; no competing intents (`docs/SEO_PAGE_REGISTRY.md`) |
 | Production verifier (dry-run) | ✅ `prod-check` exit 0 on dry-run build; exit 1 on mismatched origin (both executed) |
-| No unrelated project changes | ✅ single project workspace; 16 scoped commits |
+| No unrelated project changes | ✅ single project workspace; 18 scoped commits |
 
 ---
 
@@ -67,6 +67,8 @@
 **Domain adoption (domain pass):** `imgexact.site` adopted as the production domain; default build emits final-domain canonicals/sitemap/robots with no warning; `prod-check` dry-run PASS (9/9) against the local preview; DNS check: no records on `imgexact.site` or `imgexact.com` (strong signal of registrability; registrar WHOIS at purchase pending).
 
 **Production deployment (live review, 2026-09-19):** deployed by the operator on Vercel. Automated: `prod-check` 9/9 PASS on `https://www.imgexact.site` and via the apex redirect chain; `/definitely-not-a-page` → 404 (styled); `_astro/*.css` → `max-age=31536000, immutable`; HTML → `max-age=0, must-revalidate`; HSTS `max-age=63072000`; HTTPS on both hosts. Content fingerprints = latest build (home input `aria-label` + `tabindex="-1"`, canonical apex, 2 JSON-LD blocks; resize page: canonical + exactly one H1). **Finding (resolved):** apex 308-redirects to www while canonicals referenced the apex — resolved same day by aligning the canonical origin to `https://www.imgexact.site` (code + auto-deploy), making redirection and canonicals consistent; live re-verification recorded in the alignment pass below. Lighthouse mobile: to be run by the operator at pagespeed.web.dev (PSI API rate-limited from this environment, HTTP 429).
+
+**Canonical alignment (alignment pass, 2026-09-19):** canonical origin aligned to `https://www.imgexact.site` to match the serving host (apex 308→www) — code + docs updated; local chain green (102/102 tests, 0/0/0 check, 16 pages, canonicals/sitemap/robots on www, `prod-check` dry-run 9/9). Live re-verification: `prod-check` 9/9 PASS against `https://www.imgexact.site` directly and via the `https://imgexact.site` redirect chain; live canonical now `https://www.imgexact.site/`.
 
 ---
 
@@ -94,4 +96,4 @@ node scripts/prod-check.mjs --origin https://<domain>   # verify a deployment (l
 
 ## Repository memory
 
-Committed history (16 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep → domain adoption → production deployment review. No secrets, no env files, no external services, no analytics, no ads; the site is live (operator-deployed on Vercel, 2026-09-19).
+Committed history (18 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep → domain adoption → production deployment review → canonical alignment (www; live re-verified). No secrets, no env files, no external services, no analytics, no ads; the site is live (operator-deployed on Vercel, 2026-09-19).
