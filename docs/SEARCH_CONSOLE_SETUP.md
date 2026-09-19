@@ -1,6 +1,6 @@
 # GOOGLE SEARCH CONSOLE SETUP — manual steps after deploy
 
-**Precondition:** the site is deployed on the final domain `https://imgexact.site` (the built-in origin) and the deployed build carries it in every canonical, sitemap entry and robots reference — verify with `node scripts/prod-check.mjs --origin https://imgexact.site` (`docs/LAUNCH_GATE.md`).
+**Precondition:** the site is deployed on the final domain `https://www.imgexact.site` (the built-in canonical origin) and the deployed build carries it in every canonical, sitemap entry and robots reference — verify with `node scripts/prod-check.mjs --origin https://www.imgexact.site` (`docs/LAUNCH_GATE.md`).
 
 ## 1. Verify the property
 

@@ -71,3 +71,4 @@ Close pairs specifically reviewed: **#2 vs #3** (numeric constraint vs quality c
 | 2026-09-19 | Initial registry (15 indexable URLs) | All pages created + verified in one build; placeholders: `SITE.url` origin (see `DEPLOYMENT.md`). |
 | 2026-09-19 | Pre-launch intent audit (15 indexable pages + 404) | Verdicts recorded above; no competing pairs; no URLs/titles/metas changed. |
 | 2026-09-19 | Production origin adopted: `https://imgexact.site` | Default origin in code; placeholder concept retired — deploy-time verification now via `scripts/prod-check.mjs` (`docs/LAUNCH_GATE.md`). |
+| 2026-09-19 | Canonical origin aligned to `https://www.imgexact.site` | Matches the serving host (apex 308→www); live re-verified via `scripts/prod-check.mjs` (9/9). |

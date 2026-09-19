@@ -3,8 +3,8 @@
  * Rebranding = edit `name` + `url` here (see research/BRAND_OPTIONS.md).
  */
 
-/** Production origin (domain decided 2026-09-19). Canonicals, sitemap.xml and robots.txt all derive from it. */
-const PRODUCTION_ORIGIN = 'https://imgexact.site';
+/** Production origin — canonical host is www; the apex 308-redirects to it (aligned 2026-09-19). */
+const PRODUCTION_ORIGIN = 'https://www.imgexact.site';
 
 /** True only while this module is evaluated by the build server (i.e., during `astro build`). */
 const isBuildServer = import.meta.env.PROD && import.meta.env.SSR;

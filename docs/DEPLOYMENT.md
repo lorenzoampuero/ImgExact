@@ -1,12 +1,12 @@
 # DEPLOYMENT — prepared instructions (nothing deployed)
 
-**Current state:** **deployed** by the operator on Vercel (2026-09-19); serving at `https://www.imgexact.site` (apex `imgexact.site` currently 308-redirects to www — see `docs/PROJECT_STATUS.md` for the recommended one-setting fix so the redirect direction matches the canonicals). This document covers deployment mechanics; the step-by-step sequence and the `VERIFIED PROD` definition live in `docs/LAUNCH_GATE.md`.
+**Current state:** **deployed** by the operator on Vercel (2026-09-19); serving at `https://www.imgexact.site` — the canonical host (apex `imgexact.site` 308-redirects to it, consistent with canonicals/sitemap/robots; aligned 2026-09-19). This document covers deployment mechanics; the step-by-step sequence and the `VERIFIED PROD` definition live in `docs/LAUNCH_GATE.md`.
 
 ---
 
 ## 0. The production origin
 
-The site origin is **`https://imgexact.site`** (domain decided 2026-09-19) — built into `src/config/site.ts` as the default; `PUBLIC_SITE_URL` can override it for staging/preview builds only.
+The site origin is **`https://www.imgexact.site`** (canonical host — the apex 308-redirects to it; aligned 2026-09-19) — built into `src/config/site.ts` as the default; `PUBLIC_SITE_URL` can override it for staging/preview builds only.
 Everything user-visible on the machine side derives from this value: canonicals, Open Graph URLs, sitemap, robots, JSON-LD. The default build therefore already carries the production origin — no code change or env variable is required for a standard deploy.
 
 **Sequencing (recommended):** launch once on the definitive domain — a temporary-subdomain launch would later force canonical/sitemap rewrites and a Search Console property change. Full runbook: `docs/LAUNCH_GATE.md`.
@@ -15,7 +15,7 @@ Everything user-visible on the machine side derives from this value: canonicals,
 
 - [ ] Domain `imgexact.site` owned by the operator (registrar WHOIS + trademark checks from `research/BRAND_OPTIONS.md` completed at purchase).
 - [ ] `SITE.name` updated if the brand changed (one-line change; the name appears via the config everywhere).
-- [ ] `npm test && npm run check && npm run build` re-run green — sanity check: first `<loc>` in `dist/sitemap.xml` is `https://imgexact.site/`.
+- [ ] `npm test && npm run check && npm run build` re-run green — sanity check: first `<loc>` in `dist/sitemap.xml` is `https://www.imgexact.site/`.
 - [ ] (Staging/preview only) `PUBLIC_SITE_URL` set where needed; never point a production deploy at it.
 
 ## 1. Build artifact

@@ -3,7 +3,7 @@
 **Purpose:** the single sequence to execute when going live, and the definition of `VERIFIED PROD`.
 **Rules:** deploying requires **explicit user authorization** (project rule). Declare `VERIFIED PROD` only when every item in the final checklist is checked with recorded evidence.
 
-**Current state:** **DEPLOYED** by the operator on Vercel (2026-09-19). Serving at `https://www.imgexact.site`; apex `imgexact.site` 308-redirects to www (recommendation: set apex as primary in Vercel — see `docs/PROJECT_STATUS.md`). Automated verification: `prod-check` PASS (9/9) on both hosts; 404 styled with status 404; assets immutable-cached; HSTS present. Ads disabled (`SITE.adsEnabled: false`). Remaining for `VERIFIED PROD`: Lighthouse mobile, real-phone smoke, Search Console + Bing, indexing requests.
+**Current state:** **DEPLOYED** by the operator on Vercel (2026-09-19). Serving at `https://www.imgexact.site` — the canonical host: canonicals, sitemap and robots all use it, and the apex `imgexact.site` 308-redirects to it (aligned 2026-09-19). Automated verification: `prod-check` PASS (9/9) on both hosts; 404 styled with status 404; assets immutable-cached; HSTS present. Ads disabled (`SITE.adsEnabled: false`). Remaining for `VERIFIED PROD`: Lighthouse mobile, real-phone smoke, Search Console + Bing, indexing requests.
 
 ---
 
@@ -16,7 +16,7 @@
 
 ## 1. Production origin — nothing to configure
 
-The build already defaults to **`https://imgexact.site`** (`src/config/site.ts`). A standard deploy needs no environment variable: canonicals, sitemap and robots come out on the right origin.
+The build already defaults to **`https://www.imgexact.site`** (`src/config/site.ts`). A standard deploy needs no environment variable: canonicals, sitemap and robots come out on the right origin.
 `PUBLIC_SITE_URL` exists only to override the origin for staging/preview builds — never point a production deploy at it. No `.env` files are committed; this project has no secrets.
 
 ## 2. Clean build — must be warning-free
@@ -25,7 +25,7 @@ The build already defaults to **`https://imgexact.site`** (`src/config/site.ts`)
 npm ci
 npm test        # expected: 102 tests passed
 npm run check   # expected: 0 errors, 0 warnings, 0 hints
-npm run build   # expected: 16 pages; check: first <loc> in dist/sitemap.xml is https://imgexact.site/
+npm run build   # expected: 16 pages; check: first <loc> in dist/sitemap.xml is https://www.imgexact.site/
 ```
 
 If the sitemap shows a different origin, an override is in effect — stop and fix step 1.
@@ -36,7 +36,7 @@ Any static host (Cloudflare Pages / Netlify / Vercel / plain nginx — see `docs
 
 ## 4. Production verification (automated + manual)
 
-- [ ] `node scripts/prod-check.mjs --origin https://imgexact.site` → **exit 0**, all checks PASS
+- [ ] `node scripts/prod-check.mjs --origin https://www.imgexact.site` → **exit 0**, all checks PASS
   (verifies: 200s; self-referencing canonicals on the real origin; exactly one H1 per page; JSON-LD present; robots Sitemap line; 15 sitemap URLs, all on-origin).
 - [ ] Manual: run a real image through `/compress-image-to-size` and `/resize-image`; downloads work.
 - [ ] Manual: `https://<domain>/definitely-not-a-page` → styled 404.
@@ -45,7 +45,7 @@ Any static host (Cloudflare Pages / Netlify / Vercel / plain nginx — see `docs
 ## 5. Lighthouse on production — mobile form factor
 
 ```
-npx lighthouse https://imgexact.site --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --view
+npx lighthouse https://www.imgexact.site --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --view
 ```
 
 - Record the scores + date in `docs/PROJECT_STATUS.md` (this replaces the "Lighthouse not run" caveat).
@@ -53,7 +53,7 @@ npx lighthouse https://imgexact.site --form-factor=mobile --only-categories=perf
 
 ## 6. Real-device smoke
 
-- Open `https://imgexact.site` on a physical phone (Safari or Chrome), run one tool end-to-end (upload → process → download). Confirm no layout breakage.
+- Open `https://www.imgexact.site` on a physical phone (Safari or Chrome), run one tool end-to-end (upload → process → download). Confirm no layout breakage.
 
 ## 7. Google Search Console
 
@@ -82,7 +82,7 @@ Follow `docs/BING_SETUP.md`: add the site (fastest: import from GSC), confirm th
 
 Declare only when **all** items below hold, with evidence pasted into `docs/PROJECT_STATUS.md` (Gate 12):
 
-- [ ] Default build carried the production origin (first `<loc>` = `https://imgexact.site/`; prod-check PASS).
+- [ ] Default build carried the production origin (first `<loc>` = `https://www.imgexact.site/`; prod-check PASS).
 - [ ] `prod-check` exit 0 (paste the PASS summary).
 - [ ] Lighthouse mobile scores recorded (all four categories).
 - [ ] Real-phone smoke passed.

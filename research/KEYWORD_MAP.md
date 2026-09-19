@@ -14,7 +14,7 @@
 3. **Country/platform variants never become URLs.** No `/signature-resize-india`, no platform-partner pages. Platform *presets* (dimensions only, factual naming) are UI options inside one canonical page.
 4. **Format pairs are capped.** `png-to-jpg`, `heic-to-jpg`, `jpg-to-webp` etc. are options inside `/convert-image`. A dedicated page is allowed later only if it acquires materially different functionality **and** passes a cannibalization review recorded in `docs/SEO_PAGE_REGISTRY.md`.
 5. **Merged-decision record:** "image dimensions" and "image size checker" were merged into **one** canonical page: `/image-size-checker` (primary query "image size checker", supported secondary "image dimensions checker"). Rationale: identical user intent (inspect without modifying); splitting would cannibalize.
-6. **Canonical origin:** `SITE.url` = `https://imgexact.site` (domain decided 2026-09-19 — see `BRAND_OPTIONS.md`). Self-referencing canonical on every indexable page.
+6. **Canonical origin:** `SITE.url` = `https://www.imgexact.site` (canonical host; apex 308→www — see `BRAND_OPTIONS.md`). Self-referencing canonical on every indexable page.
 
 ---
 

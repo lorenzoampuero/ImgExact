@@ -66,11 +66,11 @@ tests/          unit tests + synthetic fixtures (no copyrighted material)
 ## Status & going live
 
 See `docs/PROJECT_STATUS.md` for the verified gate board. The production origin
-(`https://imgexact.site`) is built in; deploying needs no origin configuration (`PUBLIC_SITE_URL`
+(`https://www.imgexact.site`) is built in; deploying needs no origin configuration (`PUBLIC_SITE_URL`
 is a staging override only) — see `docs/DEPLOYMENT.md` and the launch runbook `docs/LAUNCH_GATE.md`.
 Then follow `docs/SEARCH_CONSOLE_SETUP.md` and `docs/BING_SETUP.md`.
 
-The site is deployed (Vercel, 2026-09-19) and serving at `https://www.imgexact.site` — the apex
-`imgexact.site` redirects to `www` while canonicals/sitemap/robots reference the apex; setting the
-apex as the primary domain in Vercel restores full consistency (see `docs/PROJECT_STATUS.md`).
-No analytics or ads are active, and no external service is referenced at build time.
+The site is deployed (Vercel, 2026-09-19) and serving at `https://www.imgexact.site`; canonicals,
+sitemap and robots all use the `www` host, and the apex `imgexact.site` 308-redirects to it —
+consistent redirection and canonical story (verified live). No analytics or ads are active, and no
+external service is referenced at build time.
