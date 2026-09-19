@@ -3,22 +3,21 @@
 **Purpose:** the single sequence to execute when going live, and the definition of `VERIFIED PROD`.
 **Rules:** deploying requires **explicit user authorization** (project rule). Declare `VERIFIED PROD` only when every item in the final checklist is checked with recorded evidence.
 
-**Current state:** nothing deployed; no domain purchased; ads disabled (`SITE.adsEnabled: false`). Blocked on: (1) domain decision + purchase, (2) explicit deploy authorization.
+**Current state:** nothing deployed; ads disabled (`SITE.adsEnabled: false`). Domain decided: **`imgexact.site`** — DNS screening showed no records (strong signal of registrability); registration is the operator's step. Blocked on: (1) domain registration by the operator, (2) explicit deploy authorization.
 
 ---
 
 ## 0. Preconditions
 
-- [ ] Domain chosen + purchased (brand/trademark checks per `research/BRAND_OPTIONS.md` completed).
+- [ ] Domain `imgexact.site` registered by the operator + DNS control (WHOIS/trademark checks per `research/BRAND_OPTIONS.md` at purchase time).
 - [ ] Explicit authorization to deploy given.
 
 **Why domain-first:** launching on a temporary host subdomain would later force canonical/origin/sitemap rewrites and a Search Console property change. One launch, definitive URLs.
 
-## 1. Set the production origin
+## 1. Production origin — nothing to configure
 
-Preferred (no code change): set `PUBLIC_SITE_URL=https://<domain>` in the host's build settings.
-Alternative: edit the `url` fallback in `src/config/site.ts`.
-No `.env` files are committed; this project has no secrets.
+The build already defaults to **`https://imgexact.site`** (`src/config/site.ts`). A standard deploy needs no environment variable: canonicals, sitemap and robots come out on the right origin.
+`PUBLIC_SITE_URL` exists only to override the origin for staging/preview builds — never point a production deploy at it. No `.env` files are committed; this project has no secrets.
 
 ## 2. Clean build — must be warning-free
 
@@ -26,10 +25,10 @@ No `.env` files are committed; this project has no secrets.
 npm ci
 npm test        # expected: 102 tests passed
 npm run check   # expected: 0 errors, 0 warnings, 0 hints
-npm run build   # expected: 16 pages; must NOT print the [ImgExact] placeholder warning
+npm run build   # expected: 16 pages; check: first <loc> in dist/sitemap.xml is https://imgexact.site/
 ```
 
-If the placeholder warning appears, the origin is not set — stop and fix step 1.
+If the sitemap shows a different origin, an override is in effect — stop and fix step 1.
 
 ## 3. Deploy
 
@@ -37,7 +36,7 @@ Any static host (Cloudflare Pages / Netlify / Vercel / plain nginx — see `docs
 
 ## 4. Production verification (automated + manual)
 
-- [ ] `node scripts/prod-check.mjs --origin https://<domain>` → **exit 0**, all checks PASS
+- [ ] `node scripts/prod-check.mjs --origin https://imgexact.site` → **exit 0**, all checks PASS
   (verifies: 200s; self-referencing canonicals on the real origin; exactly one H1 per page; JSON-LD present; robots Sitemap line; 15 sitemap URLs, all on-origin).
 - [ ] Manual: run a real image through `/compress-image-to-size` and `/resize-image`; downloads work.
 - [ ] Manual: `https://<domain>/definitely-not-a-page` → styled 404.
@@ -46,7 +45,7 @@ Any static host (Cloudflare Pages / Netlify / Vercel / plain nginx — see `docs
 ## 5. Lighthouse on production — mobile form factor
 
 ```
-npx lighthouse https://<domain> --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --view
+npx lighthouse https://imgexact.site --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --view
 ```
 
 - Record the scores + date in `docs/PROJECT_STATUS.md` (this replaces the "Lighthouse not run" caveat).
@@ -54,7 +53,7 @@ npx lighthouse https://<domain> --form-factor=mobile --only-categories=performan
 
 ## 6. Real-device smoke
 
-- Open `https://<domain>` on a physical phone (Safari or Chrome), run one tool end-to-end (upload → process → download). Confirm no layout breakage.
+- Open `https://imgexact.site` on a physical phone (Safari or Chrome), run one tool end-to-end (upload → process → download). Confirm no layout breakage.
 
 ## 7. Google Search Console
 
@@ -83,7 +82,7 @@ Follow `docs/BING_SETUP.md`: add the site (fastest: import from GSC), confirm th
 
 Declare only when **all** items below hold, with evidence pasted into `docs/PROJECT_STATUS.md` (Gate 12):
 
-- [ ] Production build log shows **no placeholder warning**; `PUBLIC_SITE_URL` was used.
+- [ ] Default build carried the production origin (first `<loc>` = `https://imgexact.site/`; prod-check PASS).
 - [ ] `prod-check` exit 0 (paste the PASS summary).
 - [ ] Lighthouse mobile scores recorded (all four categories).
 - [ ] Real-phone smoke passed.

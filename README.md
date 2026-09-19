@@ -65,8 +65,9 @@ tests/          unit tests + synthetic fixtures (no copyrighted material)
 
 ## Status & going live
 
-See `docs/PROJECT_STATUS.md` for the verified gate board. Before deploying: set the production
-origin via `PUBLIC_SITE_URL` at build time (or edit `src/config/site.ts`) — see `docs/DEPLOYMENT.md`.
+See `docs/PROJECT_STATUS.md` for the verified gate board. The production origin
+(`https://imgexact.site`) is built in; deploying needs no origin configuration (`PUBLIC_SITE_URL`
+is a staging override only) — see `docs/DEPLOYMENT.md` and the launch runbook `docs/LAUNCH_GATE.md`.
 Then follow `docs/SEARCH_CONSOLE_SETUP.md` and `docs/BING_SETUP.md`.
 
 Nothing in this repository is deployed, no analytics or ads are active, and no external service

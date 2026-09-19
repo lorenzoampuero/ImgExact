@@ -1,6 +1,6 @@
 # PROJECT STATUS — ImgExact (Exact Image Toolkit)
 
-**Last updated:** 2026-09-19 (hardening + launch-gate prep) · **Status vocabulary:** DONE (implemented) · TESTED (verified by execution) · PARTIAL · BLOCKED · NOT STARTED
+**Last updated:** 2026-09-19 (hardening + launch-gate prep + domain adoption) · **Status vocabulary:** DONE (implemented) · TESTED (verified by execution) · PARTIAL · BLOCKED · NOT STARTED
 **Rule applied:** nothing below says TESTED unless it was actually executed and observed in this session.
 
 ---
@@ -15,13 +15,13 @@
 | **3 — First high-value tools** | Exact File Size Compressor, Resizer, Converter, Crop | **TESTED** | Browser flows: 84 KB→49 KB @ ≤50 KB target; resize 2000×1500→800×600; JPEG→PNG conversion; crop 800×600→640×480 and 600×600 via ratio lock. |
 | **4 — Secondary tools** | Compress, Size Checker, Signature, Social, Metadata, DPI, Base64 | **TESTED** (HEIC: conditional by browser, see limits) | All seven exercised in the built site, including metadata strip with before/after verification and DPI JFIF embed (`-300dpi.jpg`). |
 | **5 — Design/UX** | Desktop/mobile layouts, keyboard, drag/drop, empty/error states | **TESTED (core + automated a11y)** · **PARTIAL (screen-reader + other engines)** | Hardening pass: axe-core WCAG 2.1 A/AA — **0 violations across all 16 pages**; two findings fixed (homepage file input now labeled; `visually-hidden` file inputs removed from the tab order — they were invisible focus stops); dropzone keyboard path functionally verified (synthetic Enter opens the file chooser on home + tool pages); no horizontal overflow at a true 390 px viewport (scrollWidth = clientWidth on home/crop; earlier 390/430/768 pass stands); crop numeric alternative; focus-visible; reduced-motion. Screen-reader pass + Firefox/Safari: **pending** (one Chromium engine here). |
-| **6 — SEO** | Unique intent/title/meta/H1/canonical, schema, sitemap, robots, internal links | **TESTED** | Registry tests enforce uniqueness + symmetric internal-link graph + anti-doorway slug policy; live checks: canonical `https://imgexact.com/...` (placeholder origin), 2 JSON-LD blocks/tool page, `robots.txt` 200 + sitemap reference, `sitemap.xml` 200 with 15 `<loc>`. |
+| **6 — SEO** | Unique intent/title/meta/H1/canonical, schema, sitemap, robots, internal links | **TESTED** | Registry tests enforce uniqueness + symmetric internal-link graph + anti-doorway slug policy; live checks: canonical `https://imgexact.site/...`, 2 JSON-LD blocks/tool page, `robots.txt` 200 + sitemap reference, `sitemap.xml` 200 with 15 `<loc>`. |
 | **7 — AI discovery** | OAI-SearchBot access, crawlable HTML, methodology content | **DONE (setup)** | `robots.txt` explicitly allows OAI-SearchBot and GPTBot per current OpenAI docs; all content server-rendered HTML; `docs/` methodology + dated sources. Verification of actual crawler behavior happens post-deploy (search console + server logs). |
 | **8 — Security/privacy** | Malformed/oversized/MIME-spoofed inputs, network audit | **TESTED** | Fixture matrix: corrupt JPEG, text file as .jpg, PNG-as-.jpg, fake 900 MP header (blocked pre-decode), EXIF-rotated photo. Network audit: 58 requests across six flows — **0 POST requests, 0 external-origin requests, 0 URLs derived from fixture names**; only local `blob:` preview URLs. See `docs/PRIVACY_NETWORK_AUDIT.md`. |
 | **9 — Performance** | Load metrics + processing benchmarks | **PARTIAL** | Measured: DOM ready 21 ms, load 68 ms (cached), CSS 16.3 KB, largest JS chunk ~31 KB raw (shared registry chunk), fonts subset ~48 KB latin woff2. Processing: 140 ms (64×64), 520 ms (synthetic 20 MP → ≤500 KB target). Lighthouse/field data: **not run** (no Lighthouse available in this environment + no deployed origin). See caveats below. |
 | **10 — AdSense readiness** | Policy/UX readiness, no ads shipped | **DONE** (documentation) · No application filed (per rules) | `docs/ADSENSE_READINESS.md`; ads disabled in `src/config/site.ts`; `AdSlot` renders nothing; placement rules documented (no slots near download). |
-| **11 — Deployment readiness** | Static build + instructions | **DONE (prepared)** · **BLOCKED on user approval + domain** | `docs/DEPLOYMENT.md`; origin now resolves from `PUBLIC_SITE_URL` (build env) with the placeholder as fallback; production builds print a prominent warning while the placeholder is in effect (verified); override build verified: canonical/OG/JSON-LD/robots/sitemap all bake the env origin into `dist/`. Nothing was deployed; no DNS touched; no spend. |
-| **12 — Production Launch Gate** | Launch sequence (domain → origin → build → deploy → verify → index) | **PREPARED** · **BLOCKED on user domain + deploy authorization** | Runbook `docs/LAUNCH_GATE.md`; automated verifier `scripts/prod-check.mjs` (dry-run exit 0 verified; mismatch test fails as designed). `VERIFIED PROD` is declared only via the runbook checklist with recorded evidence. |
+| **11 — Deployment readiness** | Static build + instructions | **DONE (prepared)** · **BLOCKED on user approval + domain registration** | `docs/DEPLOYMENT.md`; production origin `https://imgexact.site` is the built-in default (domain decided 2026-09-19) so default builds carry the final-domain canonicals (verified); `PUBLIC_SITE_URL` remains as a staging/preview override (override build verified: canonical/OG/JSON-LD/robots/sitemap follow the env origin in `dist/`). Nothing was deployed; no DNS touched; no spend. |
+| **12 — Production Launch Gate** | Launch sequence (domain → origin → build → deploy → verify → index) | **PREPARED** · **BLOCKED on domain registration + deploy authorization** | Runbook `docs/LAUNCH_GATE.md`; domain decided: **`imgexact.site`** (DNS clean at screening — registration pending with the operator); automated verifier `scripts/prod-check.mjs` (dry-run exit 0 verified; mismatch test fails as designed). `VERIFIED PROD` is declared only via the runbook checklist with recorded evidence. |
 
 ---
 
@@ -39,14 +39,14 @@
 | Privacy audit passes | ✅ zero image data transmitted |
 | Security fixtures pass | ✅ incl. decompression-bomb guard |
 | SEO audit passes | ✅ unique metadata; canonicals; sitemap; robots; schema |
-| Sitemap valid / robots valid / canonicals valid | ✅ (placeholder origin — replace before deploy) |
+| Sitemap valid / robots valid / canonicals valid | ✅ final origin `https://imgexact.site` in the default build (verified) |
 | Structured data valid where used | ✅ only supported types; free `offers.price: 0`; no fake ratings |
-| No placeholder content | ⚠️ exception: `SITE.url` falls back to the placeholder until the domain exists — now guarded (build warning + `PUBLIC_SITE_URL` override, both verified) |
+| No placeholder content | ✅ origin is the final domain (`https://imgexact.site`) by default — no placeholder remains |
 | No fake statistics | ✅ none shipped |
 | No broken buttons | ✅ all primary actions exercised |
 | Pre-launch intent audit | ✅ 15 indexable pages + 404 audited; no competing intents (`docs/SEO_PAGE_REGISTRY.md`) |
 | Production verifier (dry-run) | ✅ `prod-check` exit 0 on dry-run build; exit 1 on mismatched origin (both executed) |
-| No unrelated project changes | ✅ single project workspace; 14 scoped commits |
+| No unrelated project changes | ✅ single project workspace; 15 scoped commits |
 
 ---
 
@@ -63,6 +63,8 @@
 **Release hardening (hardening pass):** `npm ci` → 102/102 tests → `astro check` 0 errors / 0 warnings / **0 hints** (the deprecation hint is gone) → 16-page build, all exit 0. a11y: axe-core WCAG 2.1 A/AA — 0 violations across 16 pages. Copy UX: clipboard success (`Base64 copied…`) + forced-failure fallback (`…is selected — press Ctrl+C`) verified in-browser with focus + full-selection asserted. Network re-check (Base64 flow): 6 requests / 0 POST / 0 bodies / 0 external — the privacy-audit statement is unchanged. Build guard: placeholder build warns; `PUBLIC_SITE_URL=https://test.invalid` build changes canonical, OG, JSON-LD, robots and sitemap in `dist/` (verified).
 
 **Launch-gate prep (launch-gate pass):** pre-launch intent audit across the 15 indexable pages + 404 — no competing intents (verdicts in `docs/SEO_PAGE_REGISTRY.md`); `scripts/prod-check.mjs` dry-run: exit 0 against a local preview built for `https://launch-dryrun.invalid`; negative test (mismatched `--origin`) fails as designed (exit 1).
+
+**Domain adoption (domain pass):** `https://imgexact.site` set as the built-in origin; default build emits final-domain canonicals/sitemap/robots with no warning; `prod-check --origin https://imgexact.site` PASS against the local preview (9/9); DNS check: no records on `imgexact.site` or `imgexact.com` (strong signal of registrability; registrar WHOIS at purchase pending).
 
 ---
 
@@ -90,4 +92,4 @@ node scripts/prod-check.mjs --origin https://<domain>   # verify a deployment (l
 
 ## Repository memory
 
-Committed history (14 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep (intent audit, Launch Gate runbook, prod-check verifier). No secrets, no env files, no external services, no analytics, no ads, nothing deployed.
+Committed history (15 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep → domain adoption (imgexact.site as default origin). No secrets, no env files, no external services, no analytics, no ads, nothing deployed.

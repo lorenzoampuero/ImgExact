@@ -1,29 +1,22 @@
 # DEPLOYMENT — prepared instructions (nothing deployed)
 
-**Current state:** production build works (`npm run build` → `dist/`, 16 pages, exit 0). Deployment is **blocked on explicit user approval**, which per project rules is required before anything goes public. This document covers the deployment mechanics; the full step-by-step sequence and the `VERIFIED PROD` definition live in `docs/LAUNCH_GATE.md`.
+**Current state:** production build works (`npm run build` → `dist/`, 16 pages, exit 0). Deployment is **blocked on explicit user approval**, which per project rules is required before anything goes public, and on the operator registering `imgexact.site`. This document covers the deployment mechanics; the full step-by-step sequence and the `VERIFIED PROD` definition live in `docs/LAUNCH_GATE.md`.
 
 ---
 
-## 0. The one code-side blocker
+## 0. The production origin
 
-The site origin resolves in this order (single source: `src/config/site.ts`):
-
-1. **`PUBLIC_SITE_URL`** build-time environment variable — recommended for deploys.
-2. Fallback: the placeholder `https://imgexact.com` — **never deploy with it** (production builds print a prominent warning while it is in effect).
-
-Everything user-visible on the machine side derives from this value: canonicals, Open Graph URLs, sitemap, robots, JSON-LD.
-
-**Preferred deploy path:** set `PUBLIC_SITE_URL=https://your-domain` in the host's build settings (no code change, no `.env` file committed — see §1).
-**Alternative:** edit the `url` fallback in `src/config/site.ts` directly.
+The site origin is **`https://imgexact.site`** (domain decided 2026-09-19) — built into `src/config/site.ts` as the default; `PUBLIC_SITE_URL` can override it for staging/preview builds only.
+Everything user-visible on the machine side derives from this value: canonicals, Open Graph URLs, sitemap, robots, JSON-LD. The default build therefore already carries the production origin — no code change or env variable is required for a standard deploy.
 
 **Sequencing (recommended):** launch once on the definitive domain — a temporary-subdomain launch would later force canonical/sitemap rewrites and a Search Console property change. Full runbook: `docs/LAUNCH_GATE.md`.
 
 **Checklist before rebuild:**
 
-- [ ] Domain chosen + purchased by the operator (with brand/trademark checks from `research/BRAND_OPTIONS.md` completed).
+- [ ] Domain `imgexact.site` owned by the operator (registrar WHOIS + trademark checks from `research/BRAND_OPTIONS.md` completed at purchase).
 - [ ] `SITE.name` updated if the brand changed (one-line change; the name appears via the config everywhere).
-- [ ] `PUBLIC_SITE_URL` set at the host (or `src/config/site.ts` edited).
-- [ ] `npm test && npm run check && npm run build` re-run green — and the build output must **not** show the placeholder warning.
+- [ ] `npm test && npm run check && npm run build` re-run green — sanity check: first `<loc>` in `dist/sitemap.xml` is `https://imgexact.site/`.
+- [ ] (Staging/preview only) `PUBLIC_SITE_URL` set where needed; never point a production deploy at it.
 
 ## 1. Build artifact
 

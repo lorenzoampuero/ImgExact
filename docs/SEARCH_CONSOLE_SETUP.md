@@ -1,6 +1,6 @@
 # GOOGLE SEARCH CONSOLE SETUP — manual steps after deploy
 
-**Precondition:** the site is deployed on the final domain, and the origin was set at build time (`PUBLIC_SITE_URL` env var — preferred — or `src/config/site.ts`) to that exact origin (protocol + host, no trailing slash), followed by a rebuild without the placeholder warning. Do not skip that step — every canonical, sitemap entry and robots reference derives from it.
+**Precondition:** the site is deployed on the final domain `https://imgexact.site` (the built-in origin) and the deployed build carries it in every canonical, sitemap entry and robots reference — verify with `node scripts/prod-check.mjs --origin https://imgexact.site` (`docs/LAUNCH_GATE.md`).
 
 ## 1. Verify the property
 

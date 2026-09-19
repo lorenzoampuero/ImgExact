@@ -53,7 +53,7 @@ Scale 1–5 (5 = best). "Trademark confidence" stays **unknown** for all until f
 
 - **Working brand for the build: `ImgExact`** — used consistently in UI, metadata, and structured data.
 - The name lives in **exactly one place** in code (`src/config/site.ts`), so a rebrand is a one-file change until launch.
-- **Placeholder canonical origin:** `https://imgexact.com` — clearly marked in config + docs as the #1 deploy-time blocker to replace.
+- **Decision (2026-09-19): production domain = `imgexact.site`.** DNS screening on this date showed no records on `.site` or `.com` (strong signal of registrability — registrar WHOIS confirms at purchase). The origin is built into `src/config/site.ts` as the default; `PUBLIC_SITE_URL` remains as a staging override only.
 - **Before any purchase or public launch, the operator must complete:** registrar WHOIS availability, USPTO/EUIPO/WIPO trademark search for "ImgExact" (incl. classes 9/42), social handle check, live search ambiguity check, and pronounceability check by a native English speaker. If any step fails, fall back to PixReq → PixLine.
 - **No brand-impersonation risk in presets:** platform names are used factually only ("Instagram post 1080×1080") with no implied partnership; the footer includes a non-affiliation note in `/terms`.
 
