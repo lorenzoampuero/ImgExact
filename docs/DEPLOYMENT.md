@@ -35,11 +35,10 @@ Output: `dist/` — fully static (HTML, hashed `_astro/` assets, fonts, favicon,
 | Netlify / Vercel | Same shape; build `npm run build`, publish `dist` |
 | Any nginx/Apache host | Serve `dist/` as document root |
 
-**Recommended headers (host config):**
+**Headers (implemented via `vercel.json`, 2026-09-19):**
 
-- `_astro/*` (content-hashed): `Cache-Control: public, max-age=31536000, immutable`
-- `*.html`: `Cache-Control: public, max-age=0, must-revalidate`
-- Security: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a conservative `Content-Security-Policy` (script-src 'self'; img-src 'self' blob: data: — the `blob:` allowance is required for preview images; no external origins are needed at all).
+- Cache (Vercel automatic, verified live): `_astro/*` content-hashed → `public, max-age=31536000, immutable`; `*.html` → `public, max-age=0, must-revalidate`.
+- Security: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (camera/microphone/geolocation/payment/usb disabled), `X-Frame-Options: DENY`, and a conservative `Content-Security-Policy` — `script-src 'self'`; `img-src 'self' blob: data:` (the `blob:` allowance is required for preview images); no external origins anywhere.
 
 ## 3. DNS
 

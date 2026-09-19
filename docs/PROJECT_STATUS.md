@@ -81,6 +81,7 @@
 5. **Lighthouse not run** here; it is measured on production at the launch gate (`docs/LAUNCH_GATE.md` §5). Expected strong scores given static output, but **not claimed** until measured.
 6. **Firefox/Safari + screen reader = validation debt, not launch blockers** (post-review). Capability handling is precise (`probeEncodeSupport()` gates AVIF/WebP; HEIC messaging is browser-accurate) and no untested compatibility is promised anywhere on the site. Re-prioritize if Safari traffic becomes significant.
 7. **Embedded-browser harness limits (hardening pass):** Tab key events are not delivered to the page and native Playwright click actionability was flaky below the fold, so keyboard/click checks used DOM dispatch + `filechooser` interception (handlers and branches verified; a real Tab-order walk is still owed to a desktop browser pass).
+8. **Domain-reputation false positives (2026-09-19):** the fresh `.site` domain can trigger antivirus / browser-protection "possible malware" warnings even though the site loads zero third-party scripts (verified live: 0 external scripts, 0 `onclick`, 0 `javascript:`, 0 `eval`; deployed files are HTML/CSS/JS/fonts/images only). Response headers were hardened the same day via `vercel.json` (nosniff, Referrer-Policy, Permissions-Policy, X-Frame-Options, strict CSP — see `DEPLOYMENT.md`). Mitigation: submit false-positive reports to the specific vendor (Google Safe Browsing, Microsoft SmartScreen, etc.); reputation builds with domain age, indexing and traffic.
 
 ## Commands
 
