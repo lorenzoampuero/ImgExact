@@ -23,3 +23,6 @@ desktop.ini
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Local command output capture
+*-out.txt
