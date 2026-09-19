@@ -6,16 +6,22 @@
 
 ## 0. The one code-side blocker
 
-`src/config/site.ts` → `SITE.url` currently holds the placeholder origin `https://imgexact.com`.
-Replace it with the real production origin (`https://` + host, no trailing slash), then rebuild.
+The site origin resolves in this order (single source: `src/config/site.ts`):
+
+1. **`PUBLIC_SITE_URL`** build-time environment variable — recommended for deploys.
+2. Fallback: the placeholder `https://imgexact.com` — **never deploy with it** (production builds print a prominent warning while it is in effect).
+
 Everything user-visible on the machine side derives from this value: canonicals, Open Graph URLs, sitemap, robots, JSON-LD.
+
+**Preferred deploy path:** set `PUBLIC_SITE_URL=https://your-domain` in the host's build settings (no code change, no `.env` file committed — see §1).
+**Alternative:** edit the `url` fallback in `src/config/site.ts` directly.
 
 **Checklist before rebuild:**
 
 - [ ] Domain chosen + purchased by the operator (with brand/trademark checks from `research/BRAND_OPTIONS.md` completed).
 - [ ] `SITE.name` updated if the brand changed (one-line change; the name appears via the config everywhere).
-- [ ] `SITE.url` updated.
-- [ ] `npm test && npm run check && npm run build` re-run green.
+- [ ] `PUBLIC_SITE_URL` set at the host (or `src/config/site.ts` edited).
+- [ ] `npm test && npm run check && npm run build` re-run green — and the build output must **not** show the placeholder warning.
 
 ## 1. Build artifact
 
@@ -24,7 +30,7 @@ npm ci
 npm run build
 ```
 
-Output: `dist/` — fully static (HTML, hashed `_astro/` assets, fonts, favicon, OG image). No server runtime, no database, no environment variables, no secrets.
+Output: `dist/` — fully static (HTML, hashed `_astro/` assets, fonts, favicon, OG image). No server runtime, no database, no secrets; the only build-time variable is the optional `PUBLIC_SITE_URL` origin override.
 
 ## 2. Hosting options (any static host works)
 
