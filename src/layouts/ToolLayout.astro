@@ -1,0 +1,72 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import TrustStrip from '../components/TrustStrip.astro';
+import Faq from '../components/Faq.astro';
+import RelatedTools from '../components/RelatedTools.astro';
+import AdSlot from '../components/AdSlot.astro';
+import { softwareApplicationSchema, breadcrumbSchema } from '../seo/schema';
+import type { ToolEntry } from '../data/tools';
+
+interface Props {
+  tool: ToolEntry;
+}
+
+const { tool } = Astro.props;
+const schemas = [softwareApplicationSchema(tool), breadcrumbSchema(tool)];
+---
+
+<BaseLayout title={tool.title} description={tool.metaDescription} path={`/${tool.slug}`} schemas={schemas}>
+  <div class="container tool-hero">
+    <Breadcrumbs name={tool.name} />
+    <h1>{tool.h1}</h1>
+    <p class="tool-sub">{tool.sub}</p>
+    <TrustStrip />
+    <section class="tool-panel" aria-label={`${tool.name} — interactive tool`}>
+      <slot />
+    </section>
+    <p class="xsmall muted">
+      Last reviewed <time datetime={tool.lastReviewed}>{tool.lastReviewed}</time>. Runs locally — your
+      images never leave your device.
+    </p>
+  </div>
+
+  <div class="container">
+    <section class="section">
+      <div class="container container--narrow" style="padding-inline: 0;">
+        <div class="prose">
+          <h2 id="how-heading">How it works</h2>
+          <ol>
+            {tool.how.map((step) => <li>{step}</li>)}
+          </ol>
+
+          <h2 id="formats-heading">Supported formats</h2>
+          <p>{tool.accepts}</p>
+          <p class="small muted">{tool.limitsNote}</p>
+
+          <h2 id="privacy-heading">Privacy</h2>
+          <p>
+            Everything happens in your browser: the image is decoded, transformed and encoded
+            locally. Nothing is uploaded, and no filename, pixel data or metadata is sent anywhere.
+            Read more on the <a href="/privacy">privacy page</a>.
+          </p>
+
+          <h2 id="methodology-heading">Technical methodology</h2>
+          <ul>
+            {tool.methodology.map((item) => <li>{item}</li>)}
+          </ul>
+
+          <h2 id="limitations-heading">Known limitations</h2>
+          <ul>
+            {tool.limitations.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <AdSlot placement="tool-below-content" />
+    <RelatedTools tool={tool} />
+  </div>
+
+  <Faq faq={tool.faq} />
+</BaseLayout>

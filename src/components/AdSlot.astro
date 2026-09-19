@@ -1,0 +1,22 @@
+---
+/**
+ * Reserved advertising slot.
+ * Ads are disabled until explicitly enabled in src/config/site.ts after the
+ * post-launch review (docs/ADSENSE_READINESS.md). This component must never
+ * render anything resembling a button or CTA, and never sits next to the
+ * download action.
+ */
+import { SITE } from '../config/site';
+
+interface Props {
+  /** Placement label for documentation purposes only. */
+  placement: string;
+}
+
+const { placement } = Astro.props;
+const enabled = SITE.adsEnabled;
+---
+
+{enabled && (
+  <div class="ad-slot" data-enabled="true" data-placement={placement} aria-hidden="true"></div>
+)}

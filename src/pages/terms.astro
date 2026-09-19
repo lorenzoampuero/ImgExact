@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
+---
+
+<BaseLayout
+  title="Terms of use"
+  description={`Plain-language terms for using ${SITE.name}: free tools, honest outputs, no warranty on results for critical use.`}
+  path="/terms"
+>
+  <div class="container section">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <div class="prose">
+        <h1>Terms of use</h1>
+        <p>
+          By using {SITE.name} you agree to these plain-language terms. They exist to keep
+          expectations clear — not to hide anything.
+        </p>
+
+        <h2>The service</h2>
+        <p>
+          {SITE.name} provides free, browser-based image utilities. Processing happens on your
+          device. No account is required and no file is uploaded to us.
+        </p>
+
+        <h2>Your files, your rights</h2>
+        <p>
+          You keep all rights to the images you process. Because your files never reach our
+          systems, we cannot access, review or claim any rights over them.
+        </p>
+
+        <h2>No warranty for critical use</h2>
+        <p>
+          The tools are provided as-is, without warranty of any kind. Image processing depends on
+          your browser and the file itself. For critical applications — official documents,
+          medical imagery, legal submissions — always verify the result before relying on it. The
+          tools are designed to report exactly what they did, including failures, so verification
+          is quick.
+        </p>
+
+        <h2>Acceptable use</h2>
+        <ul>
+          <li>Use the tools for lawful purposes only.</li>
+          <li>Do not attempt to weaponize the feedback channels to attack this site or its users.</li>
+          <li>Do not present outputs of this site as certified-compliance products (e.g., "guaranteed accepted by any portal").</li>
+        </ul>
+
+        <h2>Intellectual property</h2>
+        <p>
+          Platform and product names (Instagram, YouTube, LinkedIn, Facebook, TikTok, X) are
+          trademarks of their respective owners, used here factually to describe image
+          specifications. No partnership or endorsement is implied.
+        </p>
+
+        <h2>Limitation of liability</h2>
+        <p>
+          To the maximum extent permitted by law, {SITE.name} is not liable for damages arising
+          from use of the tools, including rejected uploads, quality expectations, or data loss.
+          Keep your originals: every tool produces a new file and never modifies your source.
+        </p>
+
+        <h2>Changes</h2>
+        <p>
+          These terms may be updated as the service evolves. Material changes will be reflected on
+          this page.
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

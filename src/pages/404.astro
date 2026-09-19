@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { HOMEPAGE_ORDER, TOOL_MAP } from '../data/tools';
+
+const popular = HOMEPAGE_ORDER.slice(0, 6)
+  .map((slug) => TOOL_MAP.get(slug))
+  .filter((t): t is NonNullable<typeof t> => Boolean(t));
+---
+
+<BaseLayout
+  title="Page not found"
+  description="The page you were looking for does not exist. Jump straight to the image tool you need."
+  path="/404"
+  noindex={true}
+>
+  <div class="container section">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <h1>That page doesn't exist</h1>
+      <p class="tool-sub">The link may be outdated, or the address was typed with a typo. The tools below are the most used — one of them is probably what you wanted.</p>
+      <div class="tool-grid" style="margin-top: var(--sp-5);">
+        {popular.map((tool) => <ToolCard tool={tool} />)}
+      </div>
+      <p style="margin-top: var(--sp-5);"><a href="/#tools">See all tools</a></p>
+    </div>
+  </div>
+</BaseLayout>

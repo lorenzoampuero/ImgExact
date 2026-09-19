@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacy — your images never leave your device"
+  description="How these image tools protect your privacy: local browser processing, no uploads, no filenames or metadata transmitted, and what limited site-level data exists."
+  path="/privacy"
+>
+  <div class="container section">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <div class="prose">
+        <h1>Privacy</h1>
+        <p><strong>Your images never leave your device.</strong> This is not a policy promise — it is the architecture.</p>
+
+        <h2>How image processing works</h2>
+        <ol>
+          <li>You select or drop a file; your browser reads it locally.</li>
+          <li>Decoding, resizing, compressing, cropping and re-encoding all run inside the page using browser APIs.</li>
+          <li>The result is produced as a local download. There is no upload step at any point.</li>
+        </ol>
+        <p>
+          You can verify this yourself: open your browser's network inspector while using any tool.
+          Aside from loading the site's own static files, no requests carrying your image occur.
+        </p>
+
+        <h2>What we deliberately never transmit</h2>
+        <ul>
+          <li>Image bytes or pixel content</li>
+          <li>File names</li>
+          <li>EXIF, GPS or any other metadata values</li>
+          <li>Processing results or download activity</li>
+        </ul>
+
+        <h2>What the site itself collects</h2>
+        <p>
+          This build ships with <strong>no third-party analytics, no advertising scripts and no
+          external trackers</strong>. Fonts and scripts are served from this site only. If
+          privacy-conscious, aggregate tool events are added later (for example "compression
+          completed"), they will be limited to non-identifying categories — never filenames,
+          image content or metadata — and this page will be updated before they go live.
+        </p>
+
+        <h2>Local storage</h2>
+        <p>
+          Tools may remember interface preferences (such as your last-used quality mode) in your
+          browser's local storage. That data stays in your browser and can be cleared at any time
+          via your browser settings.
+        </p>
+
+        <h2>Third parties</h2>
+        <p>
+          Platform names used in presets (Instagram, YouTube, LinkedIn, etc.) refer to trademark
+          owners of those platforms. No data is shared with them by using this site; the presets
+          are simply published dimensions.
+        </p>
+
+        <h2>Your rights and questions</h2>
+        <p>
+          Because no personal data is received by this site, there is generally nothing for us to
+          delete or export on your behalf. If that ever changes, this page will state it plainly.
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,375 @@
+---
+/**
+ * Interactive panel markup for every tool variant.
+ * Behavior lives in src/scripts/tools/*.ts (loaded on demand by slug).
+ * Field names are part of the controller contract — change both together.
+ */
+import type { ToolEntry } from '../data/tools';
+import { SOCIAL_PRESETS, PRESET_PLATFORMS } from '../config/social-presets';
+
+interface Props {
+  tool: ToolEntry;
+}
+
+const { tool } = Astro.props;
+const ui = tool.ui;
+const inputId = `file-input-${tool.slug}`;
+---
+
+<div class="tool-shell" data-tool={tool.slug} data-ui={ui}>
+  <input
+    type="file"
+    id={inputId}
+    class="visually-hidden"
+    accept="image/*,.heic,.heif"
+    data-role="file-input"
+  />
+
+  <label class="dropzone" for={inputId} data-role="dropzone" tabindex="0">
+    <div class="dropzone__icon" aria-hidden="true">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <circle cx="9" cy="9" r="1.6" />
+        <path d="M21 15l-5-5L5 21" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </div>
+    <p class="dropzone__title">Drop an image here, or click to browse</p>
+    <p class="dropzone__meta">
+      JPEG · PNG · WebP · AVIF · GIF — you can also paste from the clipboard (Ctrl+V).
+      Files stay on your device.
+    </p>
+  </label>
+
+  <p class="status" data-role="status" aria-live="polite"></p>
+
+  {ui === 'compress-size' && (
+    <div class="panel-config">
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="target-size">Target file size</label>
+          <input class="input" id="target-size" data-field="target-size" inputmode="text" value="100 KB" placeholder="e.g. 50 KB" autocomplete="off" />
+          <p class="hint">Examples: 20 KB, 50 KB, 200 KB, 1 MB. The result stays at or under this limit.</p>
+        </div>
+        <div class="field">
+          <label class="label" for="target-format">Output format</label>
+          <select class="select" id="target-format" data-field="format">
+            <option value="auto" selected>Auto (best quality that fits)</option>
+            <option value="jpeg">JPEG</option>
+            <option value="webp">WebP</option>
+            <option value="png">PNG (lossless)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="check">
+          <input type="checkbox" data-field="allow-scale" />
+          <span>
+            Allow reducing pixel dimensions if the target cannot be reached otherwise.
+            <span class="muted small">Off by default — your image is never silently shrunk.</span>
+          </span>
+        </label>
+      </div>
+      <button class="btn btn--primary btn--lg" type="button" data-role="run">Compress to target size</button>
+    </div>
+  )}
+
+  {ui === 'compress' && (
+    <div class="panel-config">
+      <fieldset>
+        <legend>Quality mode</legend>
+        <div class="stack--tight">
+          <label class="check"><input type="radio" name="quality-mode" value="light" /> <span>Light — visually near-identical files</span></label>
+          <label class="check"><input type="radio" name="quality-mode" value="standard" checked /> <span>Standard — recommended balance (≈ quality 80)</span></label>
+          <label class="check"><input type="radio" name="quality-mode" value="aggressive" /> <span>Aggressive — smallest usable result (≈ quality 60)</span></label>
+          <label class="check"><input type="radio" name="quality-mode" value="custom" /> <span>Custom quality</span></label>
+        </div>
+      </fieldset>
+      <div class="field" data-field="quality-wrap" hidden>
+        <label class="label" for="quality-range">Quality: <output id="quality-out" data-role="quality-out">80</output></label>
+        <input type="range" id="quality-range" min="10" max="95" value="80" step="1" data-field="quality" />
+      </div>
+      <button class="btn btn--primary btn--lg" type="button" data-role="run">Compress image</button>
+    </div>
+  )}
+
+  {ui === 'resize' && (
+    <div class="panel-config">
+      <div class="field">
+        <label class="label" for="resize-unit">Resize by</label>
+        <select class="select" id="resize-unit" data-field="unit">
+          <option value="px" selected>Pixels</option>
+          <option value="percent">Percentage</option>
+        </select>
+      </div>
+      <div data-field="px-fields">
+        <div class="field-row">
+          <div class="field">
+            <label class="label" for="resize-width">Width (px)</label>
+            <input class="input" id="resize-width" data-field="width" inputmode="numeric" placeholder="e.g. 600" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label class="label" for="resize-height">Height (px)</label>
+            <input class="input" id="resize-height" data-field="height" inputmode="numeric" placeholder="e.g. 600" autocomplete="off" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="check">
+            <input type="checkbox" data-field="lock" checked />
+            <span>Keep aspect ratio <span class="muted small">(recommended — fill in one side and the other follows)</span></span>
+          </label>
+        </div>
+        <div class="field">
+          <label class="label" for="resize-mode">If the aspect ratio differs</label>
+          <select class="select" id="resize-mode" data-field="mode">
+            <option value="fit" selected>Fit within the box (no crop)</option>
+            <option value="fill">Fill the box by cropping (keeps ratio)</option>
+            <option value="stretch">Stretch to exactly these pixels</option>
+          </select>
+          <p class="hint">"Fit" may produce e.g. 600×450 inside a 600×600 request. "Fill" guarantees exactly 600×600 by cropping edges.</p>
+        </div>
+      </div>
+      <div data-field="percent-fields" hidden>
+        <div class="field">
+          <label class="label" for="resize-percent">Scale (%)</label>
+          <input class="input" id="resize-percent" data-field="percent" inputmode="numeric" value="50" autocomplete="off" />
+        </div>
+      </div>
+      <button class="btn btn--primary btn--lg" type="button" data-role="run">Resize image</button>
+    </div>
+  )}
+
+  {ui === 'convert' && (
+    <div class="panel-config">
+      <div class="field">
+        <label class="label" for="convert-format">Convert to</label>
+        <select class="select" id="convert-format" data-field="format">
+          <option value="image/jpeg" selected>JPEG (.jpg) — universal compatibility</option>
+          <option value="image/png">PNG (.png) — lossless, keeps transparency</option>
+          <option value="image/webp" data-probe="webp">WebP (.webp) — smaller than JPEG</option>
+          <option value="image/avif" data-probe="avif">AVIF (.avif) — smallest, modern</option>
+        </select>
+        <p class="hint">Formats your browser cannot encode are disabled automatically.</p>
+      </div>
+      <div class="field">
+        <label class="label" for="convert-quality">Quality: <output id="convert-quality-out" data-role="quality-out">85</output></label>
+        <input type="range" id="convert-quality" min="10" max="95" value="85" step="1" data-field="quality" />
+        <p class="hint">Applies to JPEG, WebP and AVIF. PNG is always lossless.</p>
+      </div>
+      <div class="field">
+        <label class="label" for="convert-bg">Background color <span class="muted small">(used when flattening transparency for JPEG)</span></label>
+        <input type="color" id="convert-bg" data-field="background" value="#ffffff" />
+      </div>
+      <button class="btn btn--primary btn--lg" type="button" data-role="run">Convert image</button>
+    </div>
+  )}
+
+  {ui === 'crop' && (
+    <div class="panel-config">
+      <div class="field">
+        <label class="label" for="crop-ratio">Aspect ratio</label>
+        <select class="select" id="crop-ratio" data-field="ratio">
+          <option value="free" selected>Free crop</option>
+          <option value="1">1:1 (square)</option>
+          <option value="1.25">4:5 (portrait)</option>
+          <option value="1.7778">16:9 (landscape)</option>
+          <option value="0.5625">9:16 (story / reel)</option>
+          <option value="1.5">3:2</option>
+        </select>
+      </div>
+      <div class="crop-stage" data-role="crop-stage" hidden>
+        <canvas data-role="crop-canvas" aria-label="Crop preview — drag to move the crop frame"></canvas>
+      </div>
+      <div class="crop-controls">
+        <div class="field">
+          <label class="label" for="crop-x">X (px)</label>
+          <input class="input" id="crop-x" data-field="crop-x" inputmode="numeric" value="0" />
+        </div>
+        <div class="field">
+          <label class="label" for="crop-y">Y (px)</label>
+          <input class="input" id="crop-y" data-field="crop-y" inputmode="numeric" value="0" />
+        </div>
+        <div class="field">
+          <label class="label" for="crop-w">Width (px)</label>
+          <input class="input" id="crop-w" data-field="crop-w" inputmode="numeric" value="0" />
+        </div>
+        <div class="field">
+          <label class="label" for="crop-h">Height (px)</label>
+          <input class="input" id="crop-h" data-field="crop-h" inputmode="numeric" value="0" />
+        </div>
+      </div>
+      <p class="hint">Drag inside the preview to move the frame, or type exact pixel values. The output is the crop region at 100%.</p>
+      <button class="btn btn--primary btn--lg" type="button" data-role="run">Crop image</button>
+    </div>
+  )}
+
+  {ui === 'signature' && (
+    <div class="panel-config">
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="sig-width">Width (px)</label>
+          <input class="input" id="sig-width" data-field="width" inputmode="numeric" value="140" />
+        </div>
+        <div class="field">
+          <label class="label" for="sig-height">Height (px)</label>
+          <input class="input" id="sig-height" data-field="height" inputmode="numeric" value="60" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="sig-target">Maximum size</label>
+          <input class="input" id="sig-target" data-field="target-kb" value="20 KB" inputmode="text" />
+        </div>
+        <div class="field">
+          <label class="label" for="sig-format">Output format</label>
+          <select class="select" id="sig-format" data-field="format">
+            <option value="image/jpeg" selected>JPEG</option>
+            <option value="image/png">PNG</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="sig-bg">Background color <span class="muted small">(for JPG output)</span></label>
+        <input type="color" id="sig-bg" data-field="background" value="#ffffff" />
+      </div>
+      <label class="check">
+        <input type="checkbox" data-field="keep-alpha" />
+        <span>Keep transparency <span class="muted small">(PNG only — ignored for JPG)</span></span>
+      </label>
+      <button class="btn btn--primary btn--lg" type="button" data-role="run">Prepare signature</button>
+    </div>
+  )}
+
+  {ui === 'social' && (
+    <div class="panel-config">
+      <div class="field">
+        <label class="label" for="social-preset">Platform &amp; placement</label>
+        <select class="select" id="social-preset" data-field="preset">
+          {PRESET_PLATFORMS.map((platform) => (
+            <optgroup label={platform}>
+              {SOCIAL_PRESETS.filter((p) => p.platform === platform).map((preset) => (
+                <option value={preset.id}>
+                  {preset.label} — {preset.width}×{preset.height}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+        <p class="hint" data-role="preset-note">
+          Sizes are reviewed periodically; each preset cites its source in the table below.
+        </p>
+      </div>
+      <div class="field">
+        <label class="label" for="social-max">Optional maximum file size</label>
+        <input class="input" id="social-max" data-field="max-kb" inputmode="text" placeholder="e.g. 2 MB (leave empty to keep quality)" />
+      </div>
+      <button class="btn btn--primary btn--lg" type="button" data-role="run">Crop &amp; resize for the platform</button>
+      <details>
+        <summary class="small muted">Preset sources &amp; review dates</summary>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>Platform</th><th>Preset</th><th>Size</th><th>Confidence</th><th>Source</th></tr>
+            </thead>
+            <tbody>
+              {SOCIAL_PRESETS.map((preset) => (
+                <tr>
+                  <td>{preset.platform}</td>
+                  <td>{preset.label}</td>
+                  <td class="num">{preset.width}×{preset.height}</td>
+                  <td>{preset.confidence}</td>
+                  <td><a href={preset.sourceUrl} rel="noopener nofollow" target="_blank">source</a></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  )}
+
+  {ui === 'metadata' && (
+    <div class="panel-config">
+      <p class="small muted">
+        The report appears as soon as you add a file. Removing metadata rebuilds the image without
+        the metadata block — you can verify the result on this same screen.
+      </p>
+      <button class="btn btn--primary btn--lg" type="button" data-role="strip" disabled>Remove metadata &amp; download a clean copy</button>
+    </div>
+  )}
+
+  {ui === 'dpi' && (
+    <div class="panel-config">
+      <fieldset>
+        <legend>What do you need?</legend>
+        <div class="stack--tight">
+          <label class="check"><input type="radio" name="dpi-mode" value="calc" checked /> <span>Calculate print size from pixels</span></label>
+          <label class="check"><input type="radio" name="dpi-mode" value="set" /> <span>Mark the file for a target print resolution (set DPI metadata)</span></label>
+        </div>
+      </fieldset>
+      <div data-field="calc-fields">
+        <div class="field">
+          <label class="label" for="dpi-value">Print resolution (DPI/PPI)</label>
+          <input class="input" id="dpi-value" data-field="dpi" inputmode="numeric" value="300" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="label" for="print-w">Required print width (inches)</label>
+            <input class="input" id="print-w" data-field="print-width" inputmode="decimal" placeholder="e.g. 6" />
+          </div>
+          <div class="field">
+            <label class="label" for="print-h">Required print height (inches)</label>
+            <input class="input" id="print-h" data-field="print-height" inputmode="decimal" placeholder="e.g. 4" />
+          </div>
+        </div>
+        <p class="status" data-role="calc-out" aria-live="polite"></p>
+      </div>
+      <div data-field="set-fields" hidden>
+        <div class="field">
+          <label class="label" for="set-dpi">Density to embed</label>
+          <select class="select" id="set-dpi" data-field="set-dpi">
+            <option value="72">72 DPI (screen)</option>
+            <option value="150">150 DPI</option>
+            <option value="300" selected>300 DPI (print standard)</option>
+            <option value="600">600 DPI</option>
+          </select>
+        </div>
+        <p class="hint">
+          This writes density metadata into a copy of the file (JPEG JFIF / PNG pHYs). It marks
+          intended print density — it cannot add image detail.
+        </p>
+        <button class="btn btn--primary" type="button" data-role="apply-dpi" disabled>Download copy with this DPI</button>
+      </div>
+    </div>
+  )}
+
+  {ui === 'base64' && (
+    <div class="panel-config">
+      <div data-role="b64-output" hidden>
+        <div class="field">
+          <label class="label" for="b64-text">Output <span class="muted small" data-role="b64-stats"></span></label>
+          <textarea class="code-output" id="b64-text" data-role="output" readonly rows="6" spellcheck="false"></textarea>
+        </div>
+        <div class="field-row">
+          <button class="btn btn--secondary" type="button" data-role="copy-b64">Copy raw Base64</button>
+          <button class="btn btn--secondary" type="button" data-role="copy-uri">Copy data URI</button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <div data-role="result" hidden></div>
+
+  <noscript>
+    <div class="note note--warning" style="margin-top: var(--sp-4);">
+      <p class="note__title">JavaScript is required</p>
+      <p>
+        This tool processes images locally in your browser and needs JavaScript to run. No data is
+        ever sent to a server — see the <a href="/privacy">privacy page</a>.
+      </p>
+    </div>
+  </noscript>
+</div>
+
+<script>
+  import '../scripts/boot';
+</script>

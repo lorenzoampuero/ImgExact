@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
+
+const title = `About ${SITE.name}`;
+---
+
+<BaseLayout
+  title={title}
+  description={`What ${SITE.name} is, how it works, and the principles behind these browser-based image tools.`}
+  path="/about"
+>
+  <div class="container section">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <div class="prose">
+        <h1>About {SITE.name}</h1>
+        <p>
+          {SITE.name} is a set of focused image utilities for one recurring problem: a destination
+          that demands an exact image — a form that rejects files over 20 KB, a platform that wants
+          1080×1350, a portal that only accepts JPG. Most tools online solve one slice of this and
+          upload your file to do it. These are built the other way around.
+        </p>
+
+        <h2>What that means in practice</h2>
+        <ul>
+          <li><strong>Local processing.</strong> Every tool runs entirely in your browser using standard web capabilities (Canvas, Web Workers where useful). No server ever sees your image.</li>
+          <li><strong>One shared engine.</strong> Compress, resize, convert and crop are built on the same validated pipeline, so behavior is consistent and honest across tools.</li>
+          <li><strong>Exact outcomes, real reports.</strong> When you set a target (KB, pixels, ratio), the tool tells you precisely what it achieved, what quality it needed, and where it could not comply — instead of silently degrading your file.</li>
+          <li><strong>Dated sources.</strong> Platform image sizes change; the presets in the social resizer carry source links and review dates, and stale specs are treated as bugs.</li>
+        </ul>
+
+        <h2>How the tools are built</h2>
+        <p>
+          The site is a static, dependency-light web application: pages are plain HTML, controls
+          are minimal JavaScript loaded only when a tool is used, and image processing code is
+          shared and tested (header parsing, EXIF handling, target-size optimization and crop math
+          all have automated tests). The performance budget targets fast interaction on
+          mobile-class devices, because many people meeting a form requirement are on a phone.
+        </p>
+
+        <h2>What this site is not</h2>
+        <ul>
+          <li>No accounts, no uploads, no cloud storage.</li>
+          <li>No analytics that receive filenames, metadata or image content — read the <a href="/privacy">privacy page</a> for the full account.</li>
+          <li>No claims we cannot verify: no fake user counts, no invented ratings.</li>
+        </ul>
+
+        <h2>Feedback and corrections</h2>
+        <p>
+          If a preset is stale, a format behaves wrong, or an explanation is inaccurate, that is a
+          bug worth fixing. When this site is deployed, a contact channel will be listed here.
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

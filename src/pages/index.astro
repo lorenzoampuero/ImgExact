@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import TrustStrip from '../components/TrustStrip.astro';
+import AdSlot from '../components/AdSlot.astro';
+import { SITE } from '../config/site';
+import { TOOLS, TOOL_CATEGORIES, HOMEPAGE_ORDER } from '../data/tools';
+import { webSiteSchema, organizationSchema } from '../seo/schema';
+
+const bySlug = new Map(TOOLS.map((t) => [t.slug, t]));
+const popular = HOMEPAGE_ORDER.map((slug) => bySlug.get(slug)).filter((t): t is NonNullable<typeof t> => Boolean(t));
+const title = `${SITE.name} — Make any image fit the exact requirement`;
+---
+
+<BaseLayout title={title} description={SITE.description} path="/" schemas={[webSiteSchema(), organizationSchema()]}>
+  <section class="container hero">
+    <p class="badge badge--accent">Free · No signup · Nothing uploaded</p>
+    <h1>Make any image fit the exact requirement.</h1>
+    <p class="hero__sub">
+      Resize, compress, convert and prepare images directly in your browser — to an exact KB, an
+      exact pixel size, or a specific platform format. Your files never leave your device.
+    </p>
+
+    <div class="dropzone" data-home-dropzone tabindex="0" role="button" aria-label="Drop an image to identify it and pick the right tool">
+      <p class="dropzone__title">Drop an image to get started</p>
+      <p class="dropzone__meta">
+        Any supported format — detected instantly, then pick the right tool. Or browse everything below.
+      </p>
+    </div>
+    <input type="file" class="visually-hidden" data-home-input accept="image/*,.heic,.heif" />
+    <div data-home-output hidden style="margin-top: var(--sp-4);"></div>
+
+    <TrustStrip />
+  </section>
+
+  <section class="container" id="tools" aria-label="All tools">
+    {TOOL_CATEGORIES.map((cat) => {
+      const list = popular.filter((t) => t.category === cat.id);
+      return list.length > 0 ? (
+        <div>
+          <p class="category-title">{cat.label}</p>
+          <div class="tool-grid">
+            {list.map((t) => <ToolCard tool={t} />)}
+          </div>
+        </div>
+      ) : null;
+    })}
+    <AdSlot placement="home-below-tools" />
+  </section>
+
+  <section class="container section">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <div class="prose">
+        <h2>Why these tools are different</h2>
+        <p>
+          Most image tools upload your file to a server. These don't — every operation runs inside
+          your browser tab. That has practical consequences:
+        </p>
+        <ul>
+          <li><strong>Privacy by architecture:</strong> your photo, its filename and its metadata are never transmitted. The privacy page documents exactly how this works.</li>
+          <li><strong>No artificial limits:</strong> no signup, no email, no watermarks, no daily caps, no wait timers — nothing between you and the file you came for.</li>
+          <li><strong>Exactness with honesty:</strong> image codecs can't produce a mathematically exact byte count. When you set a limit you get the best quality that respects it — plus a real report of what was achieved, including when a target is impossible at full size.</li>
+          <li><strong>Sources for the specs:</strong> platform sizes live in a versioned config with source links and review dates, not in copy-pasted blog content.</li>
+        </ul>
+        <p>
+          Most people start with <a href="/compress-image-to-size">compress to an exact size</a> or
+          <a href="/resize-image">resize to exact pixels</a>. Both take seconds and work offline
+          once the page is loaded.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/home';
+  </script>
+</BaseLayout>

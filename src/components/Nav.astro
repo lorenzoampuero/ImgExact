@@ -1,0 +1,19 @@
+---
+import { SITE } from '../config/site';
+const path = Astro.url.pathname;
+const is = (p: string) => (path === p || path === `${p}/` ? 'page' : undefined);
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="/">
+      <span class="brand__mark" aria-hidden="true">IX</span>
+      <span>{SITE.name}</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/#tools">All tools</a>
+      <a href="/about" aria-current={is('/about')}>About</a>
+      <a href="/privacy" aria-current={is('/privacy')}>Privacy</a>
+    </nav>
+  </div>
+</header>

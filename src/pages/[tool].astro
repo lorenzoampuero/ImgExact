@@ -1,0 +1,18 @@
+---
+import ToolLayout from '../layouts/ToolLayout.astro';
+import ToolPanel from '../components/ToolPanel.astro';
+import { TOOLS, type ToolEntry } from '../data/tools';
+
+export function getStaticPaths() {
+  return TOOLS.map((tool) => ({
+    params: { tool: tool.slug },
+    props: { tool },
+  }));
+}
+
+const { tool } = Astro.props as { tool: ToolEntry };
+---
+
+<ToolLayout tool={tool}>
+  <ToolPanel tool={tool} />
+</ToolLayout>

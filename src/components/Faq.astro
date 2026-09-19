@@ -1,0 +1,23 @@
+---
+import type { ToolFaq } from '../data/tools';
+
+interface Props {
+  faq: ToolFaq[];
+}
+
+const { faq } = Astro.props;
+---
+
+<section class="section" id="faq" aria-labelledby="faq-heading">
+  <div class="container container--narrow" style="padding-inline: 0;">
+    <h2 id="faq-heading">Frequently asked questions</h2>
+    <div class="faq">
+      {faq.map((item) => (
+        <details>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
