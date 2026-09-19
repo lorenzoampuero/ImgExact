@@ -86,10 +86,19 @@ export async function decodeFile(file: File, limits: Limits): Promise<DecodedIma
   const warnings = [...meta.warnings];
 
   if (meta.dims && (meta.dims.width !== width || meta.dims.height !== height)) {
-    // Header vs decoded mismatch: possible malformed file; report honestly.
-    warnings.push(
-      `Header reports ${meta.dims.width}x${meta.dims.height} but decoding produced ${width}x${height}. The file may be malformed — verify the result before relying on it.`,
-    );
+    // EXIF orientation 5–8 rotates the image 90°, so decoded dimensions are
+    // legitimately swapped versus the header. That is normal camera behavior —
+    // not a malformed file.
+    const swapped = meta.dims.width === height && meta.dims.height === width;
+    if (!swapped) {
+      warnings.push(
+        `Header reports ${meta.dims.width}x${meta.dims.height} but decoding produced ${width}x${height}. The file may be malformed — verify the result before relying on it.`,
+      );
+    } else {
+      warnings.push(
+        `Dimensions were adjusted to match the photo's EXIF orientation (rotated to its correct upright view: ${width} × ${height} px).`,
+      );
+    }
   }
 
   // Late pixel guard for formats without header dimensions (e.g., AVIF edge cases).

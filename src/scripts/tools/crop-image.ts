@@ -144,9 +144,12 @@ export default function init(root: HTMLElement): void {
   canvas.addEventListener('pointerdown', (event) => {
     if (!decoded) return;
     const bounds = canvas.getBoundingClientRect();
-    const px = (event.clientX - bounds.left) / viewScale;
-    const py = (event.clientY - bounds.top) / viewScale;
-    const near = HANDLE_HIT / viewScale;
+    // Map client coordinates to source-image pixels, robust against CSS scaling.
+    const factorX = decoded.width / bounds.width;
+    const factorY = decoded.height / bounds.height;
+    const px = (event.clientX - bounds.left) * factorX;
+    const py = (event.clientY - bounds.top) * factorY;
+    const near = HANDLE_HIT * Math.max(factorX, factorY);
     const corners: Array<[string, number, number]> = [
       ['nw', rect.x, rect.y],
       ['ne', rect.x + rect.width, rect.y],
@@ -170,8 +173,10 @@ export default function init(root: HTMLElement): void {
   canvas.addEventListener('pointermove', (event) => {
     if (!drag || !decoded) return;
     const bounds = canvas.getBoundingClientRect();
-    const px = (event.clientX - bounds.left) / viewScale;
-    const py = (event.clientY - bounds.top) / viewScale;
+    const factorX = decoded.width / bounds.width;
+    const factorY = decoded.height / bounds.height;
+    const px = (event.clientX - bounds.left) * factorX;
+    const py = (event.clientY - bounds.top) * factorY;
     const dx = px - drag.startX;
     const dy = py - drag.startY;
     const start = drag.startRect;

@@ -146,7 +146,20 @@ export default function init(root: HTMLElement): void {
       // Verify: parse the produced bytes again.
       const bytes = new Uint8Array(await blob.arrayBuffer());
       const after = inspectMetadata(bytes, mimeToKind(mime));
-      const stillHas = hasAnyMetadata(after);
+      // ICC color profiles are added back by the browser encoder and are not
+      // identity data — only EXIF/GPS/XMP/text chunks count as "still present".
+      const stillHas = after.hasExif || after.hasGps || after.hasXmp || after.pngTextChunks.length > 0;
+
+      const details: Array<[string, string]> = [
+        ['EXIF before', meta.hasExif ? 'present' : 'not detected'],
+        ['EXIF after', after.hasExif ? 'STILL PRESENT — review' : 'removed'],
+        ['GPS before', meta.hasGps ? 'present' : 'not detected'],
+        ['GPS after', after.hasGps ? 'STILL PRESENT — review' : 'removed'],
+      ];
+      if (after.hasXmp) details.push(['XMP after', 'STILL PRESENT — review']);
+      if (meta.hasIcc || after.hasIcc) {
+        details.push(['Color profile (ICC)', after.hasIcc ? 'standard sRGB profile re-embedded by the encoder — not identifying data' : 'removed']);
+      }
 
       renderResult(resultEl, {
         heading: stillHas ? 'Metadata partially removed — verify the details' : 'Metadata removed and verified',
@@ -155,12 +168,7 @@ export default function init(root: HTMLElement): void {
           : { label: '✓ Verified clean', kind: 'success' },
         before: { sizeBytes: currentFile.size, width: decoded.width, height: decoded.height, formatLabel: kindLabel(decoded.kind) },
         after: { sizeBytes: blob.size, width: decoded.width, height: decoded.height, formatLabel: mime.replace('image/', '').toUpperCase() },
-        details: [
-          ['EXIF before', meta.hasExif ? 'present' : 'not detected'],
-          ['EXIF after', after.hasExif ? 'STILL PRESENT — review' : 'removed'],
-          ['GPS before', meta.hasGps ? 'present' : 'not detected'],
-          ['GPS after', after.hasGps ? 'STILL PRESENT — review' : 'removed'],
-        ],
+        details,
         previewBlob: blob,
         previewAlt: 'Cleaned image preview',
         download: { blob, filename: outputFilename(currentFile.name, 'no-metadata', mime), label: 'Download clean copy' },
