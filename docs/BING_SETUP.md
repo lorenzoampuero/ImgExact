@@ -1,6 +1,6 @@
 # BING / COPILOT SETUP + IndexNow — manual steps after deploy
 
-**Precondition:** deployed on the final domain and `SITE.url` updated (same precondition as Search Console).
+**Precondition:** deployed on the final domain with its origin set at build time (`PUBLIC_SITE_URL` env var — preferred — or `src/config/site.ts`), same precondition as Search Console (`docs/LAUNCH_GATE.md`).
 
 ## 1. Bing Webmaster Tools
 

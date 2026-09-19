@@ -1,6 +1,6 @@
 # DEPLOYMENT — prepared instructions (nothing deployed)
 
-**Current state:** production build works (`npm run build` → `dist/`, 16 pages, exit 0). Deployment is **blocked on explicit user approval**, which per project rules is required before anything goes public. This document is the exact procedure for that moment.
+**Current state:** production build works (`npm run build` → `dist/`, 16 pages, exit 0). Deployment is **blocked on explicit user approval**, which per project rules is required before anything goes public. This document covers the deployment mechanics; the full step-by-step sequence and the `VERIFIED PROD` definition live in `docs/LAUNCH_GATE.md`.
 
 ---
 
@@ -15,6 +15,8 @@ Everything user-visible on the machine side derives from this value: canonicals,
 
 **Preferred deploy path:** set `PUBLIC_SITE_URL=https://your-domain` in the host's build settings (no code change, no `.env` file committed — see §1).
 **Alternative:** edit the `url` fallback in `src/config/site.ts` directly.
+
+**Sequencing (recommended):** launch once on the definitive domain — a temporary-subdomain launch would later force canonical/sitemap rewrites and a Search Console property change. Full runbook: `docs/LAUNCH_GATE.md`.
 
 **Checklist before rebuild:**
 

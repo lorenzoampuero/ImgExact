@@ -1,6 +1,6 @@
 # PROJECT STATUS — ImgExact (Exact Image Toolkit)
 
-**Last updated:** 2026-09-19 (release-hardening pass) · **Status vocabulary:** DONE (implemented) · TESTED (verified by execution) · PARTIAL · BLOCKED · NOT STARTED
+**Last updated:** 2026-09-19 (hardening + launch-gate prep) · **Status vocabulary:** DONE (implemented) · TESTED (verified by execution) · PARTIAL · BLOCKED · NOT STARTED
 **Rule applied:** nothing below says TESTED unless it was actually executed and observed in this session.
 
 ---
@@ -21,6 +21,7 @@
 | **9 — Performance** | Load metrics + processing benchmarks | **PARTIAL** | Measured: DOM ready 21 ms, load 68 ms (cached), CSS 16.3 KB, largest JS chunk ~31 KB raw (shared registry chunk), fonts subset ~48 KB latin woff2. Processing: 140 ms (64×64), 520 ms (synthetic 20 MP → ≤500 KB target). Lighthouse/field data: **not run** (no Lighthouse available in this environment + no deployed origin). See caveats below. |
 | **10 — AdSense readiness** | Policy/UX readiness, no ads shipped | **DONE** (documentation) · No application filed (per rules) | `docs/ADSENSE_READINESS.md`; ads disabled in `src/config/site.ts`; `AdSlot` renders nothing; placement rules documented (no slots near download). |
 | **11 — Deployment readiness** | Static build + instructions | **DONE (prepared)** · **BLOCKED on user approval + domain** | `docs/DEPLOYMENT.md`; origin now resolves from `PUBLIC_SITE_URL` (build env) with the placeholder as fallback; production builds print a prominent warning while the placeholder is in effect (verified); override build verified: canonical/OG/JSON-LD/robots/sitemap all bake the env origin into `dist/`. Nothing was deployed; no DNS touched; no spend. |
+| **12 — Production Launch Gate** | Launch sequence (domain → origin → build → deploy → verify → index) | **PREPARED** · **BLOCKED on user domain + deploy authorization** | Runbook `docs/LAUNCH_GATE.md`; automated verifier `scripts/prod-check.mjs` (dry-run exit 0 verified; mismatch test fails as designed). `VERIFIED PROD` is declared only via the runbook checklist with recorded evidence. |
 
 ---
 
@@ -43,7 +44,9 @@
 | No placeholder content | ⚠️ exception: `SITE.url` falls back to the placeholder until the domain exists — now guarded (build warning + `PUBLIC_SITE_URL` override, both verified) |
 | No fake statistics | ✅ none shipped |
 | No broken buttons | ✅ all primary actions exercised |
-| No unrelated project changes | ✅ single project workspace; 5 scoped commits |
+| Pre-launch intent audit | ✅ 15 indexable pages + 404 audited; no competing intents (`docs/SEO_PAGE_REGISTRY.md`) |
+| Production verifier (dry-run) | ✅ `prod-check` exit 0 on dry-run build; exit 1 on mismatched origin (both executed) |
+| No unrelated project changes | ✅ single project workspace; 14 scoped commits |
 
 ---
 
@@ -55,9 +58,11 @@
 
 **Processing:** compress tiny 64×64 → 2.4 KB in ~140 ms UI time; synthetic 20 MP JPEG → ≤500 KB target in ~520 ms encode-search time; largest fixture (4032×3024, 264 KB) processed in the size-checker flow without warnings.
 
-**Delivery (built site, cache-warm):** DOMContentLoaded 21 ms · load 68 ms · page transfer ≈ 0 KB after cache; CSS 16.3 KB; largest JS chunk 31 KB raw (⚠ improvement candidate — see below); OG image 17 KB.
+**Delivery (built site, cache-warm):** DOMContentLoaded 21 ms · load 68 ms · page transfer ≈ 0 KB after cache; CSS 16.3 KB; largest JS chunk 31 KB raw (deliberately not optimized — see Known limits); OG image 17 KB.
 
 **Release hardening (hardening pass):** `npm ci` → 102/102 tests → `astro check` 0 errors / 0 warnings / **0 hints** (the deprecation hint is gone) → 16-page build, all exit 0. a11y: axe-core WCAG 2.1 A/AA — 0 violations across 16 pages. Copy UX: clipboard success (`Base64 copied…`) + forced-failure fallback (`…is selected — press Ctrl+C`) verified in-browser with focus + full-selection asserted. Network re-check (Base64 flow): 6 requests / 0 POST / 0 bodies / 0 external — the privacy-audit statement is unchanged. Build guard: placeholder build warns; `PUBLIC_SITE_URL=https://test.invalid` build changes canonical, OG, JSON-LD, robots and sitemap in `dist/` (verified).
+
+**Launch-gate prep (launch-gate pass):** pre-launch intent audit across the 15 indexable pages + 404 — no competing intents (verdicts in `docs/SEO_PAGE_REGISTRY.md`); `scripts/prod-check.mjs` dry-run: exit 0 against a local preview built for `https://launch-dryrun.invalid`; negative test (mismatched `--origin`) fails as designed (exit 1).
 
 ---
 
@@ -66,9 +71,9 @@
 1. **In-browser processing ceiling:** hard safety limits (200 MB file / 100 MP) reject rather than crash; animated formats use first frame only (stated in every relevant tool page).
 2. **HEIC:** decode depends on the browser (Safari yes, most others no); the UX states this precisely. Untestable in this environment (no Safari).
 3. **Exact size claims:** tools say "at or under"; convergence reported; impossibility surfaced with recovery options.
-4. **31 KB shared client chunk** includes the tool registry content (FAQ/methodology strings not needed by controllers). Improvement: pass related-links via data attribute to slim the chunk. Documented, not yet applied.
-5. **Lighthouse not run** here; run locally against the deployed origin. Expected strong scores given static output, but **not claimed** until measured.
-6. **Firefox/Safari runtime** untested in this session; `probeEncodeSupport()` gates AVIF/WebP and errors are precise, so the risk is contained and stated.
+4. **31 KB shared client chunk** — deliberately not optimized (post-review decision: not a bottleneck at this stage; revisit only if field data shows a problem).
+5. **Lighthouse not run** here; it is measured on production at the launch gate (`docs/LAUNCH_GATE.md` §5). Expected strong scores given static output, but **not claimed** until measured.
+6. **Firefox/Safari + screen reader = validation debt, not launch blockers** (post-review). Capability handling is precise (`probeEncodeSupport()` gates AVIF/WebP; HEIC messaging is browser-accurate) and no untested compatibility is promised anywhere on the site. Re-prioritize if Safari traffic becomes significant.
 7. **Embedded-browser harness limits (hardening pass):** Tab key events are not delivered to the page and native Playwright click actionability was flaky below the fold, so keyboard/click checks used DOM dispatch + `filechooser` interception (handlers and branches verified; a real Tab-order walk is still owed to a desktop browser pass).
 
 ## Commands
@@ -80,8 +85,9 @@ npm run check     # astro check (typecheck)
 npm run build     # static production build → dist/
 npm run preview   # serve dist/ (astro preview start/stop/status/logs)
 npm run fixtures  # regenerate ../tests/fixtures + public/og-default.png
+node scripts/prod-check.mjs --origin https://<domain>   # verify a deployment (launch gate step 4)
 ```
 
 ## Repository memory
 
-Committed history (11 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening (engines contract, Base64 copy fix, a11y fixes, origin override + build guard, docs/watchlist). No secrets, no env files, no external services, no analytics, no ads, nothing deployed.
+Committed history (14 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep (intent audit, Launch Gate runbook, prod-check verifier). No secrets, no env files, no external services, no analytics, no ads, nothing deployed.
