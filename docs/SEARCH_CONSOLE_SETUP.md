@@ -1,6 +1,6 @@
 # GOOGLE SEARCH CONSOLE SETUP — manual steps after deploy
 
-**Precondition:** the site is deployed on the final domain, and `SITE.url` in `src/config/site.ts` has been updated to that exact origin (protocol + host, no trailing slash), followed by a rebuild. Do not skip that step — every canonical, sitemap entry and robots reference derives from it.
+**Precondition:** the site is deployed on the final domain, and the origin was set at build time (`PUBLIC_SITE_URL` env var — preferred — or `src/config/site.ts`) to that exact origin (protocol + host, no trailing slash), followed by a rebuild without the placeholder warning. Do not skip that step — every canonical, sitemap entry and robots reference derives from it.
 
 ## 1. Verify the property
 
@@ -41,6 +41,25 @@ Weekly after launch, then settle into a cadence:
 | **Countries** | Where demand clusters (expect IN/ID/BR/US per market research) | Prioritize localization *later*, based on data not guesses |
 | **Core Web Vitals** | LCP/INP/CLS in the field | Compare against local measurements in `PROJECT_STATUS.md`; treat regressions as bugs |
 | **Indexing** | Unexpected `noindex`/blocked pages, sitemap drift | Fix immediately; check `robots.txt` output |
+
+### Launch watchlist (first 30–60 days)
+
+Filter *Queries* by these exact strings (derived from `research/KEYWORD_MAP.md`) and confirm each maps to its page — a query consistently landing on the wrong page is an internal-linking or copy problem to fix before anything new is created:
+
+| Watch query | Must map to |
+|---|---|
+| `compress image to 50kb` | `/compress-image-to-size` |
+| `compress image to 20kb` | `/compress-image-to-size` |
+| `make image under 50kb` | `/compress-image-to-size` |
+| `resize image to 600x600` | `/resize-image` |
+| `convert png to jpg` | `/convert-image` |
+| `crop image to 1:1` | `/crop-image` |
+| `image size checker` | `/image-size-checker` |
+| `signature 140x60` | `/signature-resizer` |
+| `instagram post size` | `/social-image-resizer` |
+| `remove exif data` | `/image-metadata` |
+| `300 dpi converter` | `/image-dpi` |
+| `image to base64` | `/image-to-base64` |
 
 ## 6. Change discipline
 

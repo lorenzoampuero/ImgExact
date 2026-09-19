@@ -1,6 +1,6 @@
 # PROJECT STATUS — ImgExact (Exact Image Toolkit)
 
-**Last updated:** 2026-09-19 · **Status vocabulary:** DONE (implemented) · TESTED (verified by execution) · PARTIAL · BLOCKED · NOT STARTED
+**Last updated:** 2026-09-19 (release-hardening pass) · **Status vocabulary:** DONE (implemented) · TESTED (verified by execution) · PARTIAL · BLOCKED · NOT STARTED
 **Rule applied:** nothing below says TESTED unless it was actually executed and observed in this session.
 
 ---
@@ -10,17 +10,17 @@
 | Gate | Scope | State | Evidence |
 |---|---|---|---|
 | **0 — Market validation** | `research/MARKET_VALIDATION.md`, `KEYWORD_MAP.md`, `COMPETITOR_MATRIX.md`, `BRAND_OPTIONS.md` | **DONE** (research artifacts) · **PARTIAL** (no live SERP/volume API) | 4 artifacts with 24 query clusters, 12 competitors, sourced evidence; volume data explicitly labeled unverified. |
-| **1 — Foundation** | Isolation, pins, Astro/TS, layout, design tokens, SEO helpers, tests, error boundaries | **TESTED** | `npm ci` ✓ (288 pkgs, 0 vulnerabilities), `astro check` 0 errors, 102 unit tests pass, 16-page production build. Node 24.13.1 / npm 11.8.0 pinned via `.nvmrc` + `engines` + `packageManager`; TypeScript pinned to major 6 (astro check compatibility). |
+| **1 — Foundation** | Isolation, pins, Astro/TS, layout, design tokens, SEO helpers, tests, error boundaries | **TESTED** | `npm ci` ✓ (288 pkgs, 0 vulnerabilities), `astro check` 0 errors, 102 unit tests pass, 16-page production build. Node 24.13.1 / npm 11.8.0 pinned via `.nvmrc` + `packageManager`; `engines` set to `>=22.12.0` to match the Vite 8 toolchain floor (hardening pass — was `>=20.19.0`, which allowed unsupported 21.x / 22.0–22.11); `@types/node` added for the config typecheck; TypeScript pinned to major 6 (astro check compatibility). |
 | **2 — Core engine** | Validation, decode, resize, crop, encode, target-size optimization, download, memory cleanup | **TESTED** | 102 unit tests (headers/EXIF/target-search convergence/transform math/validation/Base64/registry) + 11 browser-executed tool flows. |
 | **3 — First high-value tools** | Exact File Size Compressor, Resizer, Converter, Crop | **TESTED** | Browser flows: 84 KB→49 KB @ ≤50 KB target; resize 2000×1500→800×600; JPEG→PNG conversion; crop 800×600→640×480 and 600×600 via ratio lock. |
 | **4 — Secondary tools** | Compress, Size Checker, Signature, Social, Metadata, DPI, Base64 | **TESTED** (HEIC: conditional by browser, see limits) | All seven exercised in the built site, including metadata strip with before/after verification and DPI JFIF embed (`-300dpi.jpg`). |
-| **5 — Design/UX** | Desktop/mobile layouts, keyboard, drag/drop, empty/error states | **TESTED (core)** · **PARTIAL (a11y deep audit)** | No horizontal overflow at 390/430/768 px across 5 representative pages; dropzone keyboard path present; crop has full numeric alternative; focus-visible styles; reduced-motion support. Full screen-reader pass + Firefox/Safari runtime testing: **pending** (environment had one Chromium engine). |
+| **5 — Design/UX** | Desktop/mobile layouts, keyboard, drag/drop, empty/error states | **TESTED (core + automated a11y)** · **PARTIAL (screen-reader + other engines)** | Hardening pass: axe-core WCAG 2.1 A/AA — **0 violations across all 16 pages**; two findings fixed (homepage file input now labeled; `visually-hidden` file inputs removed from the tab order — they were invisible focus stops); dropzone keyboard path functionally verified (synthetic Enter opens the file chooser on home + tool pages); no horizontal overflow at a true 390 px viewport (scrollWidth = clientWidth on home/crop; earlier 390/430/768 pass stands); crop numeric alternative; focus-visible; reduced-motion. Screen-reader pass + Firefox/Safari: **pending** (one Chromium engine here). |
 | **6 — SEO** | Unique intent/title/meta/H1/canonical, schema, sitemap, robots, internal links | **TESTED** | Registry tests enforce uniqueness + symmetric internal-link graph + anti-doorway slug policy; live checks: canonical `https://imgexact.com/...` (placeholder origin), 2 JSON-LD blocks/tool page, `robots.txt` 200 + sitemap reference, `sitemap.xml` 200 with 15 `<loc>`. |
 | **7 — AI discovery** | OAI-SearchBot access, crawlable HTML, methodology content | **DONE (setup)** | `robots.txt` explicitly allows OAI-SearchBot and GPTBot per current OpenAI docs; all content server-rendered HTML; `docs/` methodology + dated sources. Verification of actual crawler behavior happens post-deploy (search console + server logs). |
 | **8 — Security/privacy** | Malformed/oversized/MIME-spoofed inputs, network audit | **TESTED** | Fixture matrix: corrupt JPEG, text file as .jpg, PNG-as-.jpg, fake 900 MP header (blocked pre-decode), EXIF-rotated photo. Network audit: 58 requests across six flows — **0 POST requests, 0 external-origin requests, 0 URLs derived from fixture names**; only local `blob:` preview URLs. See `docs/PRIVACY_NETWORK_AUDIT.md`. |
 | **9 — Performance** | Load metrics + processing benchmarks | **PARTIAL** | Measured: DOM ready 21 ms, load 68 ms (cached), CSS 16.3 KB, largest JS chunk ~31 KB raw (shared registry chunk), fonts subset ~48 KB latin woff2. Processing: 140 ms (64×64), 520 ms (synthetic 20 MP → ≤500 KB target). Lighthouse/field data: **not run** (no Lighthouse available in this environment + no deployed origin). See caveats below. |
 | **10 — AdSense readiness** | Policy/UX readiness, no ads shipped | **DONE** (documentation) · No application filed (per rules) | `docs/ADSENSE_READINESS.md`; ads disabled in `src/config/site.ts`; `AdSlot` renders nothing; placement rules documented (no slots near download). |
-| **11 — Deployment readiness** | Static build + instructions | **DONE (prepared)** · **BLOCKED on user approval + domain** | `docs/DEPLOYMENT.md`; the single code-side blocker is `SITE.url` placeholder. Nothing was deployed; no DNS touched; no spend. |
+| **11 — Deployment readiness** | Static build + instructions | **DONE (prepared)** · **BLOCKED on user approval + domain** | `docs/DEPLOYMENT.md`; origin now resolves from `PUBLIC_SITE_URL` (build env) with the placeholder as fallback; production builds print a prominent warning while the placeholder is in effect (verified); override build verified: canonical/OG/JSON-LD/robots/sitemap all bake the env origin into `dist/`. Nothing was deployed; no DNS touched; no spend. |
 
 ---
 
@@ -40,7 +40,7 @@
 | SEO audit passes | ✅ unique metadata; canonicals; sitemap; robots; schema |
 | Sitemap valid / robots valid / canonicals valid | ✅ (placeholder origin — replace before deploy) |
 | Structured data valid where used | ✅ only supported types; free `offers.price: 0`; no fake ratings |
-| No placeholder content | ⚠️ exception: `SITE.url` (documented deploy blocker, intentional) |
+| No placeholder content | ⚠️ exception: `SITE.url` falls back to the placeholder until the domain exists — now guarded (build warning + `PUBLIC_SITE_URL` override, both verified) |
 | No fake statistics | ✅ none shipped |
 | No broken buttons | ✅ all primary actions exercised |
 | No unrelated project changes | ✅ single project workspace; 5 scoped commits |
@@ -57,6 +57,8 @@
 
 **Delivery (built site, cache-warm):** DOMContentLoaded 21 ms · load 68 ms · page transfer ≈ 0 KB after cache; CSS 16.3 KB; largest JS chunk 31 KB raw (⚠ improvement candidate — see below); OG image 17 KB.
 
+**Release hardening (hardening pass):** `npm ci` → 102/102 tests → `astro check` 0 errors / 0 warnings / **0 hints** (the deprecation hint is gone) → 16-page build, all exit 0. a11y: axe-core WCAG 2.1 A/AA — 0 violations across 16 pages. Copy UX: clipboard success (`Base64 copied…`) + forced-failure fallback (`…is selected — press Ctrl+C`) verified in-browser with focus + full-selection asserted. Network re-check (Base64 flow): 6 requests / 0 POST / 0 bodies / 0 external — the privacy-audit statement is unchanged. Build guard: placeholder build warns; `PUBLIC_SITE_URL=https://test.invalid` build changes canonical, OG, JSON-LD, robots and sitemap in `dist/` (verified).
+
 ---
 
 ## Known limits / risks carried forward
@@ -67,6 +69,7 @@
 4. **31 KB shared client chunk** includes the tool registry content (FAQ/methodology strings not needed by controllers). Improvement: pass related-links via data attribute to slim the chunk. Documented, not yet applied.
 5. **Lighthouse not run** here; run locally against the deployed origin. Expected strong scores given static output, but **not claimed** until measured.
 6. **Firefox/Safari runtime** untested in this session; `probeEncodeSupport()` gates AVIF/WebP and errors are precise, so the risk is contained and stated.
+7. **Embedded-browser harness limits (hardening pass):** Tab key events are not delivered to the page and native Playwright click actionability was flaky below the fold, so keyboard/click checks used DOM dispatch + `filechooser` interception (handlers and branches verified; a real Tab-order walk is still owed to a desktop browser pass).
 
 ## Commands
 
@@ -81,4 +84,4 @@ npm run fixtures  # regenerate ../tests/fixtures + public/og-default.png
 
 ## Repository memory
 
-Committed history (5 commits): research → scaffold → engine+tests → full site → docs (this commit). No secrets, no env files, no external services, no analytics, no ads, nothing deployed.
+Committed history (11 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening (engines contract, Base64 copy fix, a11y fixes, origin override + build guard, docs/watchlist). No secrets, no env files, no external services, no analytics, no ads, nothing deployed.
