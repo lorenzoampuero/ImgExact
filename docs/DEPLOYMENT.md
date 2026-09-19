@@ -1,6 +1,6 @@
 # DEPLOYMENT — prepared instructions (nothing deployed)
 
-**Current state:** production build works (`npm run build` → `dist/`, 16 pages, exit 0). Deployment is **blocked on explicit user approval**, which per project rules is required before anything goes public, and on the operator registering `imgexact.site`. This document covers the deployment mechanics; the full step-by-step sequence and the `VERIFIED PROD` definition live in `docs/LAUNCH_GATE.md`.
+**Current state:** **deployed** by the operator on Vercel (2026-09-19); serving at `https://www.imgexact.site` (apex `imgexact.site` currently 308-redirects to www — see `docs/PROJECT_STATUS.md` for the recommended one-setting fix so the redirect direction matches the canonicals). This document covers deployment mechanics; the step-by-step sequence and the `VERIFIED PROD` definition live in `docs/LAUNCH_GATE.md`.
 
 ---
 
@@ -61,8 +61,7 @@ Output: `dist/` — fully static (HTML, hashed `_astro/` assets, fonts, favicon,
 
 Static hosting rollbacks are trivial: keep the previous `dist/` (or the host's previous deployment) and re-point. No data migrations exist, so rollback is lossless.
 
-## 6. Explicit non-actions (project rules)
+## 6. Project rules — what the assistant never does
 
-- Nothing has been deployed.
-- No domain purchased, no DNS touched, no accounts created, no costs incurred.
-- No `wrangler`/`netlify`/`vercel` CLIs invoked; no `.env` files or secrets exist in this repo.
+- The assistant never deploys, buys domains, or touches DNS — the 2026-09-19 production deployment on Vercel was performed by the operator.
+- No `wrangler`/`netlify`/`vercel` CLIs invoked by the assistant; no `.env` files or secrets exist in this repo.

@@ -3,14 +3,14 @@
 **Purpose:** the single sequence to execute when going live, and the definition of `VERIFIED PROD`.
 **Rules:** deploying requires **explicit user authorization** (project rule). Declare `VERIFIED PROD` only when every item in the final checklist is checked with recorded evidence.
 
-**Current state:** nothing deployed; ads disabled (`SITE.adsEnabled: false`). Domain decided: **`imgexact.site`** — DNS screening showed no records (strong signal of registrability); registration is the operator's step. Blocked on: (1) domain registration by the operator, (2) explicit deploy authorization.
+**Current state:** **DEPLOYED** by the operator on Vercel (2026-09-19). Serving at `https://www.imgexact.site`; apex `imgexact.site` 308-redirects to www (recommendation: set apex as primary in Vercel — see `docs/PROJECT_STATUS.md`). Automated verification: `prod-check` PASS (9/9) on both hosts; 404 styled with status 404; assets immutable-cached; HSTS present. Ads disabled (`SITE.adsEnabled: false`). Remaining for `VERIFIED PROD`: Lighthouse mobile, real-phone smoke, Search Console + Bing, indexing requests.
 
 ---
 
 ## 0. Preconditions
 
-- [ ] Domain `imgexact.site` registered by the operator + DNS control (WHOIS/trademark checks per `research/BRAND_OPTIONS.md` at purchase time).
-- [ ] Explicit authorization to deploy given.
+- [x] Domain `imgexact.site` registered by the operator + DNS control (live since 2026-09-19).
+- [x] Deploy executed by the operator (Vercel, 2026-09-19).
 
 **Why domain-first:** launching on a temporary host subdomain would later force canonical/origin/sitemap rewrites and a Search Console property change. One launch, definitive URLs.
 

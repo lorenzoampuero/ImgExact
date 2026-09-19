@@ -1,6 +1,6 @@
 # PROJECT STATUS — ImgExact (Exact Image Toolkit)
 
-**Last updated:** 2026-09-19 (hardening + launch-gate prep + domain adoption) · **Status vocabulary:** DONE (implemented) · TESTED (verified by execution) · PARTIAL · BLOCKED · NOT STARTED
+**Last updated:** 2026-09-19 (hardening + launch-gate prep + domain adoption + production deployment) · **Status vocabulary:** DONE (implemented) · TESTED (verified by execution) · PARTIAL · BLOCKED · NOT STARTED
 **Rule applied:** nothing below says TESTED unless it was actually executed and observed in this session.
 
 ---
@@ -20,8 +20,8 @@
 | **8 — Security/privacy** | Malformed/oversized/MIME-spoofed inputs, network audit | **TESTED** | Fixture matrix: corrupt JPEG, text file as .jpg, PNG-as-.jpg, fake 900 MP header (blocked pre-decode), EXIF-rotated photo. Network audit: 58 requests across six flows — **0 POST requests, 0 external-origin requests, 0 URLs derived from fixture names**; only local `blob:` preview URLs. See `docs/PRIVACY_NETWORK_AUDIT.md`. |
 | **9 — Performance** | Load metrics + processing benchmarks | **PARTIAL** | Measured: DOM ready 21 ms, load 68 ms (cached), CSS 16.3 KB, largest JS chunk ~31 KB raw (shared registry chunk), fonts subset ~48 KB latin woff2. Processing: 140 ms (64×64), 520 ms (synthetic 20 MP → ≤500 KB target). Lighthouse/field data: **not run** (no Lighthouse available in this environment + no deployed origin). See caveats below. |
 | **10 — AdSense readiness** | Policy/UX readiness, no ads shipped | **DONE** (documentation) · No application filed (per rules) | `docs/ADSENSE_READINESS.md`; ads disabled in `src/config/site.ts`; `AdSlot` renders nothing; placement rules documented (no slots near download). |
-| **11 — Deployment readiness** | Static build + instructions | **DONE (prepared)** · **BLOCKED on user approval + domain registration** | `docs/DEPLOYMENT.md`; production origin `https://imgexact.site` is the built-in default (domain decided 2026-09-19) so default builds carry the final-domain canonicals (verified); `PUBLIC_SITE_URL` remains as a staging/preview override (override build verified: canonical/OG/JSON-LD/robots/sitemap follow the env origin in `dist/`). Nothing was deployed; no DNS touched; no spend. |
-| **12 — Production Launch Gate** | Launch sequence (domain → origin → build → deploy → verify → index) | **PREPARED** · **BLOCKED on domain registration + deploy authorization** | Runbook `docs/LAUNCH_GATE.md`; domain decided: **`imgexact.site`** (DNS clean at screening — registration pending with the operator); automated verifier `scripts/prod-check.mjs` (dry-run exit 0 verified; mismatch test fails as designed). `VERIFIED PROD` is declared only via the runbook checklist with recorded evidence. |
+| **11 — Deployment readiness** | Static build + instructions | **TESTED (deployed)** | **Live since 2026-09-19** at `https://www.imgexact.site` (operator-deployed on Vercel; apex 308→www — see production review below); deployed build matches the latest commit (a11y fingerprints verified in the live HTML); automated `prod-check` PASS (9/9) on www and via the apex redirect chain. |
+| **12 — Production Launch Gate** | Launch sequence (domain → origin → build → deploy → verify → index) | **IN PROGRESS — deployed, automated verification PASSED** | Live review: canonicals/H1/JSON-LD correct, 404 = styled 404 (status 404), `_astro/*` immutable caching, HTML revalidate, HSTS present. Remaining for `VERIFIED PROD`: Lighthouse mobile (PSI API quota-blocked here — run at pagespeed.web.dev), real-phone smoke, GSC + Bing setup, indexing requests (`docs/LAUNCH_GATE.md`). |
 
 ---
 
@@ -46,7 +46,7 @@
 | No broken buttons | ✅ all primary actions exercised |
 | Pre-launch intent audit | ✅ 15 indexable pages + 404 audited; no competing intents (`docs/SEO_PAGE_REGISTRY.md`) |
 | Production verifier (dry-run) | ✅ `prod-check` exit 0 on dry-run build; exit 1 on mismatched origin (both executed) |
-| No unrelated project changes | ✅ single project workspace; 15 scoped commits |
+| No unrelated project changes | ✅ single project workspace; 16 scoped commits |
 
 ---
 
@@ -65,6 +65,8 @@
 **Launch-gate prep (launch-gate pass):** pre-launch intent audit across the 15 indexable pages + 404 — no competing intents (verdicts in `docs/SEO_PAGE_REGISTRY.md`); `scripts/prod-check.mjs` dry-run: exit 0 against a local preview built for `https://launch-dryrun.invalid`; negative test (mismatched `--origin`) fails as designed (exit 1).
 
 **Domain adoption (domain pass):** `https://imgexact.site` set as the built-in origin; default build emits final-domain canonicals/sitemap/robots with no warning; `prod-check --origin https://imgexact.site` PASS against the local preview (9/9); DNS check: no records on `imgexact.site` or `imgexact.com` (strong signal of registrability; registrar WHOIS at purchase pending).
+
+**Production deployment (live review, 2026-09-19):** deployed by the operator on Vercel. Automated: `prod-check` 9/9 PASS on `https://www.imgexact.site` and via the apex redirect chain; `/definitely-not-a-page` → 404 (styled); `_astro/*.css` → `max-age=31536000, immutable`; HTML → `max-age=0, must-revalidate`; HSTS `max-age=63072000`; HTTPS on both hosts. Content fingerprints = latest build (home input `aria-label` + `tabindex="-1"`, canonical apex, 2 JSON-LD blocks; resize page: canonical + exactly one H1). **Finding:** apex 308-redirects to www while canonicals/sitemap/robots reference the apex — fix by setting `imgexact.site` as the primary domain in Vercel (zero code changes), or alternatively switch `SITE.url` to www + rebuild + redeploy. Lighthouse mobile: to be run by the operator at pagespeed.web.dev (PSI API rate-limited from this environment, HTTP 429).
 
 ---
 
@@ -92,4 +94,4 @@ node scripts/prod-check.mjs --origin https://<domain>   # verify a deployment (l
 
 ## Repository memory
 
-Committed history (15 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep → domain adoption (imgexact.site as default origin). No secrets, no env files, no external services, no analytics, no ads, nothing deployed.
+Committed history (16 commits): research → scaffold → engine+tests → full site → fixes → docs → hardening → launch-gate prep → domain adoption → production deployment review. No secrets, no env files, no external services, no analytics, no ads; the site is live (operator-deployed on Vercel, 2026-09-19).

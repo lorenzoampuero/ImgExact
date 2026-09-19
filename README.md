@@ -70,5 +70,7 @@ See `docs/PROJECT_STATUS.md` for the verified gate board. The production origin
 is a staging override only) — see `docs/DEPLOYMENT.md` and the launch runbook `docs/LAUNCH_GATE.md`.
 Then follow `docs/SEARCH_CONSOLE_SETUP.md` and `docs/BING_SETUP.md`.
 
-Nothing in this repository is deployed, no analytics or ads are active, and no external service
-is referenced at build time.
+The site is deployed (Vercel, 2026-09-19) and serving at `https://www.imgexact.site` — the apex
+`imgexact.site` redirects to `www` while canonicals/sitemap/robots reference the apex; setting the
+apex as the primary domain in Vercel restores full consistency (see `docs/PROJECT_STATUS.md`).
+No analytics or ads are active, and no external service is referenced at build time.
