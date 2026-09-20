@@ -59,7 +59,7 @@ src/data/       tool registry (the single source of truth for pages, SEO metadat
 src/config/     site config + versioned social presets (sources + review dates)
 src/pages/      static pages incl. robots.txt + sitemap.xml endpoints
 research/       market validation, keyword map, competitor matrix, brand options (Gate 0)
-docs/           project status, SEO registry, deployment, Search Console, Bing/IndexNow, AdSense, privacy audit
+docs/           project status, SEO registry, deployment, Search Console, Bing/IndexNow, AdSense, analytics, privacy audit
 tests/          unit tests + synthetic fixtures (no copyrighted material)
 ```
 
@@ -72,5 +72,6 @@ Then follow `docs/SEARCH_CONSOLE_SETUP.md` and `docs/BING_SETUP.md`.
 
 The site is deployed (Vercel, 2026-09-19) and serving at `https://www.imgexact.site`; canonicals,
 sitemap and robots all use the `www` host, and the apex `imgexact.site` 308-redirects to it —
-consistent redirection and canonical story (verified live). No analytics or ads are active, and no
-external service is referenced at build time.
+consistent redirection and canonical story (verified live). No ads are active. The only analytics is
+Vercel Web Analytics — first-party and cookieless, served from this domain (no CSP exception, no
+third-party hosts, no cookies); see `docs/ANALYTICS.md`.

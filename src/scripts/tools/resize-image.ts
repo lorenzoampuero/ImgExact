@@ -13,6 +13,7 @@ import { initDropzone } from '../ui/dropzone';
 import { renderResult } from '../ui/result';
 import { inputValue, qs, qsMaybe, setStatus } from '../ui/dom';
 import { relatedLinks } from '../ui/related';
+import { applyPrefs, watchPrefs } from '../ui/prefs';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 30));
 
@@ -162,6 +163,7 @@ export default function init(root: HTMLElement): void {
         ],
         previewBlob: blob,
         previewAlt: 'Resized result preview',
+        beforePreviewBlob: currentFile,
         download: { blob, filename: outputFilename(currentFile.name, `resized-${plan.outWidth}x${plan.outHeight}`, mime), label: 'Download resized image' },
         note: upscaled
           ? { kind: 'warning', body: 'This output is larger than the original in pixels. Enlarging cannot create real detail — for print, use the size checker to compare what your pixels support.' }
@@ -182,4 +184,8 @@ export default function init(root: HTMLElement): void {
   }
 
   runBtn.addEventListener('click', () => void run());
+
+  // Restore last-used options for this tool (interface choices only — never file data).
+  applyPrefs(root, slug);
+  watchPrefs(root, slug);
 }

@@ -7,7 +7,7 @@
 1. Open Google Search Console → *Add property* → **Domain** property (recommended; covers all subdomains + both protocols).
 2. Copy the DNS TXT token and add it at the domain registrar.
 3. Wait for propagation (minutes to hours), then click *Verify*.
-4. Alternative if DNS access is limited: **URL-prefix** property with an HTML file at the root or a meta tag in `src/layouts/BaseLayout.astro`.
+4. Alternative if DNS access is limited: **URL-prefix** property with an HTML file at the root, or the meta-tag path: set `PUBLIC_GOOGLE_SITE_VERIFICATION` in Vercel → Settings → Environment Variables and redeploy — `src/layouts/BaseLayout.astro` then emits `<meta name="google-site-verification">` automatically (nothing is emitted while the variable is empty).
 
 ## 2. Submit the sitemap
 
@@ -27,7 +27,7 @@ For `/compress-image-to-size`, `/resize-image`, `/convert-image`, `/crop-image`,
 
 - Canonical points to itself (not an alias).
 - Title/description unique (compare against `docs/SEO_PAGE_REGISTRY.md`).
-- Structured data detected (`SoftwareApplication` + `BreadcrumbList`).
+- Structured data detected (`SoftwareApplication` + `BreadcrumbList` + `FAQPage`; the FAQ block is also verified against the visible page text by `node scripts/prod-check.mjs`).
 - *Request indexing* for each — spaced out, not all at once.
 
 ## 5. Ongoing monitoring (the feedback loop)

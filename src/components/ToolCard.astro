@@ -6,9 +6,36 @@ interface Props {
 }
 
 const { tool } = Astro.props;
+
+/** Inline SVG per category — no icon font, no external requests. */
+const ICONS: Record<ToolEntry['category'], string> = {
+  optimize:
+    '<path d="M9 3v4a2 2 0 0 1-2 2H3M15 3v4a2 2 0 0 0 2 2h4M9 21v-4a2 2 0 0 0-2-2H3M15 21v-4a2 2 0 0 1 2-2h4"/>',
+  resize:
+    '<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  convert: '<path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/>',
+  prepare:
+    '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 15l2 2 4-4"/>',
+  inspect: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M8 11h6"/>',
+  developer: '<path d="m8 7-5 5 5 5M16 7l5 5-5 5"/>',
+};
 ---
 
 <a class="tool-card" href={`/${tool.slug}`}>
-  <span class="tool-card__title">{tool.name}</span>
-  <span class="tool-card__desc">{tool.short}</span>
+  <span class="tool-card__icon" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.7"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      set:html={ICONS[tool.category]}
+    />
+  </span>
+  <span class="tool-card__body">
+    <span class="tool-card__title">{tool.name}</span>
+    <span class="tool-card__desc">{tool.short}</span>
+  </span>
+  <span class="tool-card__arrow" aria-hidden="true">→</span>
 </a>

@@ -6,6 +6,7 @@ import { readHead } from '../engine/decode';
 import { sniffKind, readDimensions, kindLabel, mimeForKind } from '../engine/headers';
 import { formatBytes, formatRatio } from '../engine/format';
 import { h } from './ui/dom';
+import { createPageDropTarget } from './ui/dropzone';
 
 export default function initHome(): void {
   const zone = document.querySelector<HTMLElement>('[data-home-dropzone]');
@@ -78,10 +79,27 @@ export default function initHome(): void {
   });
   zone.addEventListener('dragleave', () => zone.classList.remove('is-dragover'));
   zone.addEventListener('drop', (event) => {
+    // Delivery is handled by the page-wide drop target below.
     event.preventDefault();
     zone.classList.remove('is-dragover');
-    const file = event.dataTransfer?.files?.[0];
-    if (file) void analyze(file);
+  });
+
+  // Same conveniences as the tool pages: drop anywhere, or paste from the clipboard.
+  createPageDropTarget((file) => void analyze(file));
+
+  document.addEventListener('paste', (event) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) {
+          event.preventDefault();
+          void analyze(file);
+        }
+        return;
+      }
+    }
   });
 }
 

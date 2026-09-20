@@ -52,3 +52,12 @@ No third-party origins appear at all: fonts are self-hosted (Fontsource), script
 - Executed in a Chromium-based engine only. Firefox and Safari were not available in this environment; the code uses standard, broadly supported APIs (`createImageBitmap`, canvas, `toBlob`/`convertToBlob`, `URL.createObjectURL`) with a fallback decode path, and **no** network APIs at all in the engines.
 - No service worker is registered in this build.
 - The audit covers the current build; any future feature that adds network calls (e.g., an optional cloud feature) must be audited again before shipping, and this document updated.
+
+## Addendum — 2026-09-20: first-party page statistics added
+
+The build audited above contained no analytics. On 2026-09-20 the site gained **Vercel Web Analytics** (cookieless, no cross-site identifiers — full description in `docs/ANALYTICS.md`). The properties this audit cares about were re-verified on the new build (local preview, Chromium):
+
+- The analytics script is requested from **this origin** (`/_vercel/insights/script.js`) and the beacon posts to `/_vercel/insights/view` — both same-origin; no cookie, no third-party host.
+- A tool page load produced **12 requests, 0 to non-local origins**; the only new request compared with the audited build is that same-origin script.
+- Unchanged and re-checkable: no request carries image bytes, no request URL contains the fixture filename, and no request derives from tool input. The beacon fires only from the analytics script, never from tool code — the tools have no network APIs in them at all.
+- Locally the beacon does not fire because the `/_vercel/insights/*` routes exist only on Vercel deployments; the script request is captured and asserted same-origin instead.

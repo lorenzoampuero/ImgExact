@@ -5,16 +5,53 @@ import TrustStrip from '../components/TrustStrip.astro';
 import AdSlot from '../components/AdSlot.astro';
 import { SITE } from '../config/site';
 import { TOOLS, TOOL_CATEGORIES, HOMEPAGE_ORDER } from '../data/tools';
-import { webSiteSchema, organizationSchema } from '../seo/schema';
+import { webSiteSchema, organizationSchema, faqPageSchema } from '../seo/schema';
 
 const bySlug = new Map(TOOLS.map((t) => [t.slug, t]));
 const popular = HOMEPAGE_ORDER.map((slug) => bySlug.get(slug)).filter((t): t is NonNullable<typeof t> => Boolean(t));
 const title = `${SITE.name} — Make any image fit the exact requirement`;
+
+/** Site-level questions answered honestly — also emitted as FAQPage data below. */
+const HOME_FAQ = [
+  {
+    q: 'Are these image tools really free?',
+    a: 'Yes. There is no signup, no payment, no watermark, no daily cap and no wait timer. Because every tool runs inside your browser, there is nothing to meter or bill for.',
+  },
+  {
+    q: 'Are my images uploaded to a server?',
+    a: 'No. Your browser decodes the file, applies the change and re-encodes the result locally. The only network traffic a visit creates is the page itself plus anonymous, cookieless page statistics — your image, its filename and its metadata never leave your device.',
+  },
+  {
+    q: 'Which image formats can I use?',
+    a: 'JPEG, PNG, WebP, AVIF and GIF (first frame) work in every modern browser. HEIC/HEIF can be read where the browser itself can decode it — Safari does, most desktop browsers do not. Output formats available for conversion are stated before you run the tool, based on what your browser can encode.',
+  },
+  {
+    q: 'Is there a file size limit?',
+    a: 'Files up to about 50 MB are the sweet spot. The hard safety limits are 200 MB and 100 megapixels, chosen to protect your browser tab: files beyond them are rejected with a clear message instead of crashing.',
+  },
+  {
+    q: 'Can a tool make a file exactly 50 KB?',
+    a: 'No honest tool can hit an exact byte count, because image encoders quantize their output. The compressor maximizes quality subject to your limit, so you get the best-looking image that is at or under 50 KB, plus a report of exactly what it achieved — and a clear message when a target is impossible at full size.',
+  },
+  {
+    q: 'Do the tools work offline?',
+    a: 'Once a page has loaded, processing needs no connection: the image never leaves the tab. You can turn off Wi-Fi and keep working, which is also the simplest way to verify the privacy claim yourself.',
+  },
+];
 ---
 
-<BaseLayout title={title} description={SITE.description} path="/" schemas={[webSiteSchema(), organizationSchema()]}>
+<BaseLayout
+  title={title}
+  description={SITE.description}
+  path="/"
+  schemas={[webSiteSchema(), organizationSchema(), faqPageSchema(HOME_FAQ)]}
+>
   <section class="container hero">
-    <p class="badge badge--accent">Free · No signup · Nothing uploaded</p>
+    <div class="hero__meta">
+      <span class="badge badge--accent">Free · No signup</span>
+      <span class="badge">Nothing uploaded</span>
+      <span class="badge">Works offline once loaded</span>
+    </div>
     <h1>Make any image fit the exact requirement.</h1>
     <p class="hero__sub">
       Resize, compress, convert and prepare images directly in your browser — to an exact KB, an
@@ -38,9 +75,42 @@ const title = `${SITE.name} — Make any image fit the exact requirement`;
     <div data-home-output hidden style="margin-top: var(--sp-4);"></div>
 
     <TrustStrip />
+    <p class="hero__browse">
+      <a href="#tools">Browse all {TOOLS.length} tools ↓</a>
+    </p>
+  </section>
+
+  <section class="container section" aria-labelledby="how-it-works">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <div class="section-head">
+        <h2 id="how-it-works">How it works</h2>
+        <p>Three steps, no account, no queue — and nothing to clean up afterwards.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="step__num" aria-hidden="true">1</span>
+          <h3>Pick the tool</h3>
+          <p>Start from a requirement — a target size in KB, exact pixels, a format, a platform preset — or drop a file above and let the site identify what you have.</p>
+        </div>
+        <div class="step">
+          <span class="step__num" aria-hidden="true">2</span>
+          <h3>Set your numbers</h3>
+          <p>Type the constraint exactly as the portal, form or platform states it. Limits, output contracts and trade-offs are spelled out before you run anything.</p>
+        </div>
+        <div class="step">
+          <span class="step__num" aria-hidden="true">3</span>
+          <h3>Download and go</h3>
+          <p>The file is processed in your tab, compared before/after, and saved straight to your device — no upload step, no email, no watermark.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="container" id="tools" aria-label="All tools">
+    <div class="section-head">
+      <h2>All tools</h2>
+      <p>Every tool runs locally in your browser — pick one and set your exact requirement.</p>
+    </div>
     {TOOL_CATEGORIES.map((cat) => {
       const list = popular.filter((t) => t.category === cat.id);
       return list.length > 0 ? (
@@ -74,6 +144,23 @@ const title = `${SITE.name} — Make any image fit the exact requirement`;
           <a href="/resize-image">resize to exact pixels</a>. Both take seconds and work offline
           once the page is loaded.
         </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <div class="section-head">
+        <h2 id="home-faq-heading">Frequently asked questions</h2>
+        <p>The short version of how these tools treat your files, your time and your money.</p>
+      </div>
+      <div class="faq" aria-labelledby="home-faq-heading">
+        {HOME_FAQ.map((item) => (
+          <details>
+            <summary>{item.q}</summary>
+            <p>{item.a}</p>
+          </details>
+        ))}
       </div>
     </div>
   </section>

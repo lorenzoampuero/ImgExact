@@ -1,6 +1,6 @@
 # ADSENSE READINESS — assessment and guardrails
 
-**Status:** preparation only. **No AdSense application has been filed, no ad code exists anywhere in the build, no third-party scripts are loaded.** Ads are gated behind `SITE.adsEnabled` (currently `false`); the `AdSlot` component renders nothing while disabled.
+**Status:** preparation only. **No AdSense application has been filed, no ad code exists anywhere in the build, no third-party scripts are loaded.** Ads are gated behind `SITE.adsEnabled` (currently `false`); the `AdSlot` component renders nothing while disabled. The only analytics in the build is Vercel Web Analytics — first-party, cookieless page views (`docs/ANALYTICS.md`).
 
 ---
 

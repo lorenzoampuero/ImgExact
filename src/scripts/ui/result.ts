@@ -5,6 +5,7 @@
 
 import { formatBytes } from '../../engine/format';
 import { h } from './dom';
+import { renderCompare } from './compare';
 import { objectUrl, revokePrevious } from './urls';
 
 export interface SideStats {
@@ -35,6 +36,12 @@ export interface ResultData {
   note?: ResultNote;
   previewBlob?: Blob | null;
   previewAlt?: string;
+  /**
+   * The original file. When its dimensions match the result, the panel renders
+   * an interactive before/after comparison instead of a plain preview.
+   */
+  beforePreviewBlob?: Blob | null;
+  beforePreviewAlt?: string;
   download?: { blob: Blob; filename: string; label?: string } | null;
   extraActions?: ResultAction[];
   onReset?: () => void;
@@ -84,14 +91,8 @@ export function renderResult(container: HTMLElement, data: ResultData): void {
     );
   }
 
-  if (data.previewBlob) {
-    const url = objectUrl(data.previewBlob);
-    root.append(
-      h('div', { class: 'result__preview' }, [
-        h('img', { src: url, alt: data.previewAlt ?? 'Result preview', loading: 'eager' }),
-      ]),
-    );
-  }
+  const preview = previewBlock(data);
+  if (preview) root.append(preview);
 
   if (data.details && data.details.length > 0) {
     const dl = h('dl', { class: 'result__dl', style: 'padding: 0 var(--sp-5) var(--sp-3);' });
@@ -160,4 +161,47 @@ export function renderResult(container: HTMLElement, data: ResultData): void {
   }
 
   container.append(root);
+}
+
+/** Maximum pixel count for which a live comparison is rendered (memory guard). */
+const COMPARE_MAX_PIXELS = 32_000_000;
+
+/**
+ * A comparison only makes sense when the result keeps the original dimensions
+ * (compression, conversion). Resize and crop change geometry, so they keep the
+ * plain preview.
+ */
+function compareBlock(data: ResultData): HTMLElement | null {
+  const afterBlob = data.previewBlob;
+  const beforeBlob = data.beforePreviewBlob;
+  if (!afterBlob || !beforeBlob) return null;
+
+  const width = data.after?.width;
+  const height = data.after?.height;
+  if (width === undefined || height === undefined) return null;
+  if (data.before?.width !== width || data.before?.height !== height) return null;
+  if (width * height > COMPARE_MAX_PIXELS) return null;
+
+  return renderCompare({
+    beforeUrl: objectUrl(beforeBlob),
+    afterUrl: objectUrl(afterBlob),
+    width,
+    height,
+    beforeAlt: data.beforePreviewAlt ?? 'Original image (before)',
+    afterAlt: data.previewAlt ?? 'Result image (after)',
+  });
+}
+
+function previewBlock(data: ResultData): HTMLElement | null {
+  if (!data.previewBlob) return null;
+  return (
+    compareBlock(data) ??
+    h('div', { class: 'result__preview' }, [
+      h('img', {
+        src: objectUrl(data.previewBlob),
+        alt: data.previewAlt ?? 'Result preview',
+        loading: 'eager',
+      }),
+    ])
+  );
 }

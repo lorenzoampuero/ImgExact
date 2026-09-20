@@ -14,6 +14,7 @@ import { initDropzone } from '../ui/dropzone';
 import { renderResult } from '../ui/result';
 import { qs, qsMaybe, radioValue, setStatus } from '../ui/dom';
 import { relatedLinks } from '../ui/related';
+import { applyPrefs, watchPrefs } from '../ui/prefs';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 30));
 
@@ -140,6 +141,7 @@ export default function init(root: HTMLElement): void {
           ],
           previewBlob: blob,
           previewAlt: 'Compressed result preview',
+          beforePreviewBlob: currentFile,
           download: { blob, filename: outputFilename(currentFile.name, 'compressed', mime), label: 'Download compressed image' },
           note: background
             ? { kind: 'info', body: 'Transparent areas were flattened onto white because JPEG cannot store transparency.' }
@@ -159,4 +161,8 @@ export default function init(root: HTMLElement): void {
   }
 
   runBtn.addEventListener('click', () => void run());
+
+  // Restore last-used options for this tool (interface choices only — never file data).
+  applyPrefs(root, slug);
+  watchPrefs(root, slug);
 }

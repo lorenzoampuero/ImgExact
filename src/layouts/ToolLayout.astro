@@ -5,7 +5,7 @@ import TrustStrip from '../components/TrustStrip.astro';
 import Faq from '../components/Faq.astro';
 import RelatedTools from '../components/RelatedTools.astro';
 import AdSlot from '../components/AdSlot.astro';
-import { softwareApplicationSchema, breadcrumbSchema } from '../seo/schema';
+import { softwareApplicationSchema, breadcrumbSchema, faqPageSchema } from '../seo/schema';
 import type { ToolEntry } from '../data/tools';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 const { tool } = Astro.props;
-const schemas = [softwareApplicationSchema(tool), breadcrumbSchema(tool)];
+const schemas = [softwareApplicationSchema(tool), breadcrumbSchema(tool), faqPageSchema(tool.faq)];
 ---
 
 <BaseLayout title={tool.title} description={tool.metaDescription} path={`/${tool.slug}`} schemas={schemas}>

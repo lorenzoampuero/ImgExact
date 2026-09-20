@@ -25,7 +25,7 @@ npm ci
 npm run build
 ```
 
-Output: `dist/` — fully static (HTML, hashed `_astro/` assets, fonts, favicon, OG image). No server runtime, no database, no secrets; the only build-time variable is the optional `PUBLIC_SITE_URL` origin override.
+Output: `dist/` — fully static (HTML, hashed `_astro/` assets, fonts, favicon, OG image). No server runtime, no database, no secrets. All build-time variables are public: the optional `PUBLIC_SITE_URL` origin override and the optional search-engine verification tokens `PUBLIC_GOOGLE_SITE_VERIFICATION` / `PUBLIC_BING_SITE_VERIFICATION` (emitted as `<meta>` tags; nothing is emitted while they are empty — see `docs/SEARCH_CONSOLE_SETUP.md`).
 
 ## 2. Hosting options (any static host works)
 
@@ -38,7 +38,7 @@ Output: `dist/` — fully static (HTML, hashed `_astro/` assets, fonts, favicon,
 **Headers (implemented via `vercel.json`, 2026-09-19):**
 
 - Cache (Vercel automatic, verified live): `_astro/*` content-hashed → `public, max-age=31536000, immutable`; `*.html` → `public, max-age=0, must-revalidate`.
-- Security: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (camera/microphone/geolocation/payment/usb disabled), `X-Frame-Options: DENY`, and a conservative `Content-Security-Policy` — `script-src 'self'`; `img-src 'self' blob: data:` (the `blob:` allowance is required for preview images); no external origins anywhere.
+- Security: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (camera/microphone/geolocation/payment/usb disabled), `X-Frame-Options: DENY`, and a conservative `Content-Security-Policy` — `script-src 'self'`; `img-src 'self' blob: data:` (the `blob:` allowance is required for preview images); no external origins anywhere. Vercel Web Analytics (2026-09-20) is same-origin (`/_vercel/insights/*`), so this CSP needs no exception.
 
 ## 3. DNS
 
@@ -55,6 +55,7 @@ Output: `dist/` — fully static (HTML, hashed `_astro/` assets, fonts, favicon,
 5. `https://<domain>/404` path tests: an unknown URL returns the styled 404 page with `noindex`.
 6. Cache headers spot-check (`_astro/*` immutable; HTML revalidate).
 7. Then, and only then: complete `docs/SEARCH_CONSOLE_SETUP.md` and `docs/BING_SETUP.md` (with IndexNow key creation).
+8. Enable *Analytics* in the Vercel dashboard (project → Analytics → Enable) and confirm the same-origin beacon (`/_vercel/insights/view`) in DevTools → Network on a production page; `prod-check` flags the script route until this has happened (`docs/ANALYTICS.md`).
 
 ## 5. Rollback
 

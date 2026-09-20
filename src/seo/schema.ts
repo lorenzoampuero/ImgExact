@@ -7,7 +7,7 @@
  */
 
 import { SITE, absoluteUrl } from '../config/site';
-import type { ToolEntry } from '../data/tools';
+import type { ToolEntry, ToolFaq } from '../data/tools';
 
 export function webSiteSchema(): object {
   return {
@@ -65,5 +65,25 @@ export function breadcrumbSchema(tool: ToolEntry): object {
         item: absoluteUrl(`/${tool.slug}`),
       },
     ],
+  };
+}
+
+/**
+ * FAQPage structured data. Emitted only from Q&A that is visible on the page
+ * (tool FAQ sections, homepage FAQ) — required by Google's structured-data
+ * policy, and it is what AI answer engines quote.
+ */
+export function faqPageSchema(faq: ToolFaq[]): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    })),
   };
 }

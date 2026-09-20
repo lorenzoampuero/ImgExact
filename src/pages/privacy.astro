@@ -21,7 +21,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </ol>
         <p>
           You can verify this yourself: open your browser's network inspector while using any tool.
-          Aside from loading the site's own static files, no requests carrying your image occur.
+          Aside from loading the site's own static files and the anonymous statistics beacon
+          described below, no requests occur at all.
         </p>
 
         <h2>What we deliberately never transmit</h2>
@@ -34,11 +35,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <h2>What the site itself collects</h2>
         <p>
-          This build ships with <strong>no third-party analytics, no advertising scripts and no
-          external trackers</strong>. Fonts and scripts are served from this site only. If
-          privacy-conscious, aggregate tool events are added later (for example "compression
-          completed"), they will be limited to non-identifying categories — never filenames,
-          image content or metadata — and this page will be updated before they go live.
+          Tool processing stays local. For aggregate site statistics, this build uses
+          <strong>Vercel Web Analytics</strong> — a first-party, cookieless service provided by the
+          hosting platform and served from this domain. There are still no third-party analytics
+          vendors, no advertising scripts and no external trackers; fonts and scripts remain
+          self-hosted. It records only anonymous data points: the page path, the referring site,
+          approximate location, browser, operating system and device class. Visitors are identified
+          by a short-lived hash derived from the incoming request, which is discarded after 24
+          hours; nothing is tied to an individual person or stored IP address, and it cannot
+          reconstruct a browsing session across sites. Vercel publishes the exact data list in its
+          <a href="https://vercel.com/docs/analytics/privacy-policy" rel="noopener">Web Analytics privacy documentation</a>.
+        </p>
+        <p>
+          Nothing about your files is ever included in those statistics: no image content, no
+          filenames, no metadata, no processing results and no download activity. If tool-specific
+          aggregate events are added later (for example "compression completed"), they will be
+          limited to non-identifying categories and this page will be updated before they go live.
         </p>
 
         <h2>Local storage</h2>

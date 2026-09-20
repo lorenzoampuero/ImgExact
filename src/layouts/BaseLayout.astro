@@ -3,6 +3,7 @@ import '@fontsource-variable/inter';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import Analytics from '@vercel/analytics/astro';
 import { SITE, absoluteUrl } from '../config/site';
 
 interface Props {
@@ -18,6 +19,15 @@ const { title, description, path, schemas = [], noindex = false } = Astro.props;
 const fullTitle = title.includes(SITE.name) ? title : `${title} | ${SITE.name}`;
 const canonical = absoluteUrl(path);
 const ogImage = absoluteUrl('/og-default.png');
+
+/**
+ * Optional search-engine verification tokens. Set the variables in the hosting
+ * dashboard (Vercel → Project → Settings → Environment Variables) and redeploy;
+ * nothing is emitted while they are empty. See docs/SEARCH_CONSOLE_SETUP.md
+ * and docs/BING_SETUP.md.
+ */
+const googleVerification = (import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION ?? '').trim();
+const bingVerification = (import.meta.env.PUBLIC_BING_SITE_VERIFICATION ?? '').trim();
 ---
 
 <!doctype html>
@@ -29,6 +39,8 @@ const ogImage = absoluteUrl('/og-default.png');
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+    {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+    {bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />
@@ -45,11 +57,16 @@ const ogImage = absoluteUrl('/og-default.png');
     <meta name="twitter:image" content={ogImage} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" content="#f8fafc" />
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
 
     {schemas.map((schema) => (
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />
     ))}
+
+    {/* First-party, cookieless page-view statistics (same-origin script + beacon). */}
+    <Analytics />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

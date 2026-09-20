@@ -6,25 +6,24 @@
 
 1. Go to Bing Webmaster Tools → *Add site*.
 2. Fastest path: **Import from Google Search Console** (carries verification + sitemap).
-3. Otherwise verify via the meta tag in `src/layouts/BaseLayout.astro` or the XML file at the root.
+3. Otherwise verify with either the XML file at the root or the meta-tag path: set `PUBLIC_BING_SITE_VERIFICATION` in Vercel → Settings → Environment Variables and redeploy — `BaseLayout.astro` then emits `<meta name="msvalidate.01">`.
 4. Submit `https://<your-domain>/sitemap.xml` under *Sitemaps*.
 5. Use *URL Inspection* on the homepage + top four tools once.
 
-## 2. IndexNow (implemented, needs a key at deploy time)
+## 2. IndexNow (key generated and published — ready to run)
 
 IndexNow notifies Bing (and other participating engines) about **changed URLs only**. The project rule: use it for URLs that were *added, materially changed, or removed* — never ping unchanged pages (it wastes crawl quota; Bing counts every submission against it).
 
-**Setup (one-time):**
+**Setup (done 2026-09-20):**
 
-1. Generate a key: any random hex string, e.g. `node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"`.
-2. Host it as a text file at the site root: `public/<key>.txt` containing exactly the key.
-   *(The file is not committed with a real key — create it at deploy time and keep it out of public repos if you prefer.)*
-3. Note the exact key location URL: `https://<your-domain>/<key>.txt`.
+1. Key: `ffd3028e54d261a7ec9ebfb0667673b2`.
+2. Published as `public/ffd3028e54d261a7ec9ebfb0667673b2.txt` → served at `https://www.imgexact.site/ffd3028e54d261a7ec9ebfb0667673b2.txt` after the next deploy.
+3. Key location URL for submissions: `https://www.imgexact.site/ffd3028e54d261a7ec9ebfb0667673b2.txt`.
 
 **Submitting URLs (after each deploy that changes URLs):**
 
 ```powershell
-node scripts/indexnow.mjs --host <your-domain> --key <key> --key-file "https://<your-domain>/<key>.txt" --urls https://<your-domain>/compress-image-to-size https://<your-domain>/resize-image
+npm run indexnow -- --host www.imgexact.site --key ffd3028e54d261a7ec9ebfb0667673b2 --key-file "https://www.imgexact.site/ffd3028e54d261a7ec9ebfb0667673b2.txt" --urls https://www.imgexact.site/compress-image-to-size https://www.imgexact.site/resize-image
 ```
 
 The script (see `scripts/indexnow.mjs`) posts to `https://api.indexnow.org/indexnow` with the documented JSON body and reports the response per the official status table:

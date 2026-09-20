@@ -43,10 +43,16 @@ const EXPECTED_SITEMAP_URLS = 15;
 
 let checks = 0;
 let failures = 0;
+let warnings = 0;
 const report = (ok, label, detail = '') => {
   checks += 1;
   if (!ok) failures += 1;
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? ` — ${detail}` : ''}`);
+};
+/** Non-fatal: reported, but never flips the exit code. */
+const warn = (label, detail = '') => {
+  warnings += 1;
+  console.log(`WARN  ${label}${detail ? ` — ${detail}` : ''}`);
 };
 
 async function fetchText(url) {
@@ -110,6 +116,76 @@ async function checkSitemap() {
   }
 }
 
+const FAQ_PAGE = '/compress-image-to-size';
+
+const decodeEntities = (html) =>
+  html
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+
+async function checkFaqSchema() {
+  try {
+    const { status, body } = await fetchText(`${base}${FAQ_PAGE}`);
+    const problems = [];
+    if (status !== 200) problems.push(`status ${status}`);
+
+    const blocks = [...body.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
+      (m) => m[1],
+    );
+    const faq = blocks
+      .map((raw) => {
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return null;
+        }
+      })
+      .find((parsed) => parsed && parsed['@type'] === 'FAQPage');
+
+    if (!faq) {
+      problems.push('no FAQPage JSON-LD');
+    } else {
+      const questions = (faq.mainEntity ?? []).map((item) => item.name);
+      if (questions.length < 3) problems.push(`${questions.length} questions (want >= 3)`);
+      const visibleText = decodeEntities(body);
+      const missing = questions.filter((question) => !visibleText.includes(question));
+      if (missing.length > 0) problems.push(`question not visible on the page: "${missing[0]}"`);
+    }
+
+    report(problems.length === 0, `${FAQ_PAGE} FAQ schema`, problems.join('; '));
+  } catch (err) {
+    report(false, `${FAQ_PAGE} FAQ schema`, `fetch failed: ${err.message}`);
+  }
+}
+
+async function checkAnalytics() {
+  try {
+    const { body } = await fetchText(`${base}/`);
+    const problems = [];
+    if (!body.includes('<vercel-analytics')) problems.push('analytics component missing from HTML');
+    report(problems.length === 0, 'Web Analytics component', problems.join('; '));
+
+    const res = await fetch(`${base}/_vercel/insights/script.js`, {
+      redirect: 'follow',
+      signal: AbortSignal.timeout(15000),
+      headers: { 'user-agent': 'ImgExact-prod-check/1.0' },
+    });
+    if (res.status === 200) {
+      report(true, 'Web Analytics script route');
+    } else {
+      warn(
+        'Web Analytics script route',
+        `/_vercel/insights/script.js → ${res.status}; enable Analytics in the Vercel dashboard, then redeploy`,
+      );
+    }
+  } catch (err) {
+    report(false, 'Web Analytics', `fetch failed: ${err.message}`);
+  }
+}
+
 console.log(`ImgExact production check — expected origin: ${origin}`);
 console.log(`Fetching from: ${base}\n`);
 
@@ -119,9 +195,12 @@ for (const path of PAGES) {
 }
 await checkRobots();
 await checkSitemap();
+await checkFaqSchema();
+await checkAnalytics();
 
 console.log(
-  `\n${failures === 0 ? 'RESULT: PASS' : 'RESULT: FAIL'} — ${checks - failures}/${checks} checks passed`,
+  `\n${failures === 0 ? 'RESULT: PASS' : 'RESULT: FAIL'} — ${checks - failures}/${checks} checks passed` +
+    (warnings > 0 ? `, ${warnings} warning(s)` : ''),
 );
 // Set the exit code and let Node close pooled sockets naturally — calling process.exit() here
 // races undici's socket cleanup and trips a libuv assertion on Windows (observed 2026-09-19).

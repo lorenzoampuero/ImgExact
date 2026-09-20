@@ -3,7 +3,7 @@
 **Purpose:** the single sequence to execute when going live, and the definition of `VERIFIED PROD`.
 **Rules:** deploying requires **explicit user authorization** (project rule). Declare `VERIFIED PROD` only when every item in the final checklist is checked with recorded evidence.
 
-**Current state:** **DEPLOYED** by the operator on Vercel (2026-09-19). Serving at `https://www.imgexact.site` — the canonical host: canonicals, sitemap and robots all use it, and the apex `imgexact.site` 308-redirects to it (aligned 2026-09-19). Automated verification: `prod-check` PASS (9/9) on both hosts; 404 styled with status 404; assets immutable-cached; HSTS present. Ads disabled (`SITE.adsEnabled: false`). Remaining for `VERIFIED PROD`: Lighthouse mobile, real-phone smoke, Search Console + Bing, indexing requests.
+**Current state:** **DEPLOYED** by the operator on Vercel (2026-09-19). Serving at `https://www.imgexact.site` — the canonical host: canonicals, sitemap and robots all use it, and the apex `imgexact.site` 308-redirects to it (aligned 2026-09-19). Automated verification: `prod-check` PASS on both hosts (9/9 live, before the FAQPage + analytics checks existed; **11/11 dry-run** on the 2026-09-20 build); 404 styled with status 404; assets immutable-cached; HSTS present. Ads disabled (`SITE.adsEnabled: false`); first-party cookieless analytics integrated 2026-09-20 (`docs/ANALYTICS.md`) — the dashboard toggle + deploy is pending. Remaining for `VERIFIED PROD`: Analytics enabled + beacon observed, Lighthouse mobile, real-phone smoke, Search Console + Bing, indexing requests.
 
 ---
 
@@ -37,7 +37,8 @@ Any static host (Cloudflare Pages / Netlify / Vercel / plain nginx — see `docs
 ## 4. Production verification (automated + manual)
 
 - [ ] `node scripts/prod-check.mjs --origin https://www.imgexact.site` → **exit 0**, all checks PASS
-  (verifies: 200s; self-referencing canonicals on the real origin; exactly one H1 per page; JSON-LD present; robots Sitemap line; 15 sitemap URLs, all on-origin).
+  (verifies: 200s; self-referencing canonicals on the real origin; exactly one H1 per page; JSON-LD present incl. FAQPage whose questions/answers are visible; robots Sitemap line; 15 sitemap URLs, all on-origin; analytics component in the HTML).
+- [ ] Analytics: *Enable* in the Vercel dashboard, then confirm the same-origin beacon (`/_vercel/insights/view`) on a production page — the `Web Analytics script route` check must go from WARN to PASS (`docs/ANALYTICS.md`).
 - [ ] Manual: run a real image through `/compress-image-to-size` and `/resize-image`; downloads work.
 - [ ] Manual: `https://<domain>/definitely-not-a-page` → styled 404.
 - [ ] Spot-check one tool page's source: canonical + JSON-LD present.
@@ -87,6 +88,7 @@ Declare only when **all** items below hold, with evidence pasted into `docs/PROJ
 - [ ] Lighthouse mobile scores recorded (all four categories).
 - [ ] Real-phone smoke passed.
 - [ ] GSC property verified; sitemap processed with 15 URLs.
+- [ ] Web Analytics enabled in the Vercel dashboard; beacon observed on production (same-origin).
 - [ ] Bing site added; first IndexNow submission (if applicable) returned 200.
 - [ ] 404 page + one tool flow verified by hand on production.
 
