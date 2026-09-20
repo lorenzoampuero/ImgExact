@@ -163,10 +163,28 @@ async function checkFaqSchema() {
 
 async function checkAnalytics() {
   try {
-    const { body } = await fetchText(`${base}/`);
+    const { status, body } = await fetchText(`${base}/`);
     const problems = [];
-    if (!body.includes('<vercel-analytics')) problems.push('analytics component missing from HTML');
-    report(problems.length === 0, 'Web Analytics component', problems.join('; '));
+    if (status !== 200) problems.push(`status ${status}`);
+
+    // The loader must live in an external, same-origin bundle: an inline loader
+    // would be blocked by the production CSP (regression caught 2026-09-20).
+    const scriptSrcs = [...body.matchAll(/<script[^>]+src="([^"]+)"/g)].map((m) => m[1]);
+    let loaderFound = false;
+    for (const src of scriptSrcs) {
+      if (!src.startsWith('/')) continue;
+      try {
+        const bundle = await fetchText(`${base}${src}`);
+        if (bundle.body.includes('_vercel/insights')) {
+          loaderFound = true;
+          break;
+        }
+      } catch {
+        /* a missing bundle is reported by the page checks */
+      }
+    }
+    if (!loaderFound) problems.push('no same-origin analytics loader in a bundled script');
+    report(problems.length === 0, 'Web Analytics loader (CSP-safe)', problems.join('; '));
 
     const res = await fetch(`${base}/_vercel/insights/script.js`, {
       redirect: 'follow',
@@ -186,6 +204,23 @@ async function checkAnalytics() {
   }
 }
 
+/** Inline executable scripts would be silently blocked by the production CSP. */
+async function checkNoInlineScripts() {
+  try {
+    const { status, body } = await fetchText(`${base}/`);
+    const problems = [];
+    if (status !== 200) problems.push(`status ${status}`);
+    const inline = [...body.matchAll(/<script(?![^>]*\ssrc=)[^>]*>/g)].map((m) => m[0]);
+    const executable = inline.filter((tag) => !tag.includes('application/ld+json'));
+    if (executable.length > 0) {
+      problems.push(`${executable.length} inline executable script(s) would be blocked by script-src 'self'`);
+    }
+    report(problems.length === 0, 'CSP: no inline executable scripts', problems.join('; '));
+  } catch (err) {
+    report(false, 'CSP: no inline executable scripts', `fetch failed: ${err.message}`);
+  }
+}
+
 console.log(`ImgExact production check — expected origin: ${origin}`);
 console.log(`Fetching from: ${base}\n`);
 
@@ -197,6 +232,7 @@ await checkRobots();
 await checkSitemap();
 await checkFaqSchema();
 await checkAnalytics();
+await checkNoInlineScripts();
 
 console.log(
   `\n${failures === 0 ? 'RESULT: PASS' : 'RESULT: FAIL'} — ${checks - failures}/${checks} checks passed` +

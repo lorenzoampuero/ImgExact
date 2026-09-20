@@ -14,4 +14,12 @@ export default defineConfig({
   build: {
     inlineStylesheets: 'auto',
   },
+  vite: {
+    build: {
+      // Script chunks stay external on purpose: the strict CSP (`script-src 'self'`,
+      // vercel.json) blocks inline executable scripts, and the first-party
+      // analytics loader must run. Inline *styles* are still allowed by the CSP.
+      assetsInlineLimit: 0,
+    },
+  },
 });
