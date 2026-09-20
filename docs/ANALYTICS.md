@@ -1,6 +1,6 @@
 # WEB ANALYTICS — ImgExact
 
-**Status:** integrated 2026-09-20 (`@vercel/analytics@2` + `<Analytics />` in `src/layouts/BaseLayout.astro`). Ads remain off (`SITE.adsEnabled: false`).
+**Status:** integrated and **verified live 2026-09-20** (`@vercel/analytics@2`; loader in `src/scripts/analytics.ts`). Ads remain off (`SITE.adsEnabled: false`).
 **Rule:** the privacy page documents every data path. Nothing analytics-related ships before `/privacy` and this file agree — they were updated in the same change.
 
 ---
@@ -23,25 +23,30 @@ Vercel Web Analytics, injected by the official Astro component:
 
 Reference: Vercel Web Analytics privacy and compliance documentation (`https://vercel.com/docs/analytics/privacy-policy`), linked from `/privacy`.
 
-## Where the requests go
+## How it is loaded (and why not the Astro component)
+
+The official `@vercel/analytics/astro` component cannot be used here: it emits its loader as an **inline** `<script type="module">`, and the production CSP (`script-src 'self'`, `vercel.json`) correctly blocks inline scripts. That failure is silent in development (the CSP header only exists on Vercel) and was caught by a browser check on production on 2026-09-20 — no page views were being recorded.
+
+Instead, `src/layouts/BaseLayout.astro` imports `src/scripts/analytics.ts`, which calls the package's `inject()` and is emitted by Astro as an **external, same-origin `_astro/*.js`** bundle. `vite.build.assetsInlineLimit: 0` in `astro.config.mjs` guarantees that script chunks are never inlined (inline *styles* remain allowed by the CSP).
 
 | Request | URL | Note |
 |---|---|---|
-| Script | `/_vercel/insights/script.js` | **Same origin** — served by the Vercel deployment when Analytics is enabled |
-| Beacon (page view) | `/_vercel/insights/view` | **Same origin** |
+| Loader bundle | `/_astro/BaseLayout.*.js` | external, same-origin, CSP-safe |
+| Script | `/_vercel/insights/script.js` | **same origin** — served by the Vercel deployment once Analytics is enabled |
+| Beacon (page view) | `/_vercel/insights/view` | **same origin**, POST |
 
 Consequences:
 
-- The strict CSP in `vercel.json` (`script-src 'self'`, `connect-src 'self'`) needs **no exception**, and the "zero third-party origins" posture holds.
-- `mode` stays `auto`: `astro build` bakes in the production script path (verified in `dist/index.html`), while `astro dev` loads the debug script from `va.vercel-scripts.com` — development only, never in a deployed build.
-- On the Vercel build the component may pick up a randomized intake path (package v2 "Resilient Intake") — still same-origin.
+- The strict CSP needs **no exception** (`script-src 'self'`), and the "zero third-party origins" posture holds.
+- `astro dev` loads the package's debug script from `va.vercel-scripts.com` (development only; the production path is baked in at build time).
+- On the Vercel build the package may pick up a randomized intake path (v2 "Resilient Intake") — still same-origin.
 
 ## Enable, verify, disable
 
-1. **Enable:** Vercel dashboard → project → *Analytics* → **Enable**. The intake routes are added on the next deployment.
-2. **Verify:** `node scripts/prod-check.mjs --origin https://www.imgexact.site` prints a `Web Analytics component` check (hard) and a `Web Analytics script route` check (warning until the dashboard toggle + redeploy land). In a browser, confirm the same-origin beacon in DevTools → Network on a production page.
+1. **Enable:** Vercel dashboard → project → *Analytics* → **Enable** (done). The intake routes are added on the next deployment.
+2. **Verify:** `node scripts/prod-check.mjs --origin https://www.imgexact.site` runs three analytics-related checks — `Web Analytics loader (CSP-safe)` (hard), `Web Analytics script route` (warning until the dashboard toggle + redeploy land) and `CSP: no inline executable scripts` (hard, the regression guard for the bug above). In a browser, confirm the same-origin beacon in DevTools → Network on a production page.
 3. **Data:** dashboard → project → *Analytics*. First page views appear within ~30 seconds of the next visit; content blockers may hide some visitors, and that is acceptable.
-4. **Disable:** delete the `<Analytics />` line in `src/layouts/BaseLayout.astro` (or rebuild without the package) and update `/privacy` in the same change.
+4. **Disable:** remove the `<script>import '../scripts/analytics'</script>` block from `src/layouts/BaseLayout.astro` (or rebuild without the package) and update `/privacy` in the same change.
 
 ## Deliberate limits
 
