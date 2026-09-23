@@ -27,6 +27,9 @@ describe('guide registry', () => {
   it('slugs are unique, and no tool slug collides with a guide slug', () => {
     const slugs = GUIDES.map((guide) => guide.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
+    const labels = GUIDES.map((guide) => guide.label.toLowerCase());
+    expect(new Set(labels).size).toBe(labels.length);
+    for (const guide of GUIDES) expect(guide.label.length).toBeGreaterThan(12);
     const toolSlugs = new Set(TOOLS.map((tool) => tool.slug));
     for (const slug of slugs) {
       expect(slug).toMatch(/^[a-z][a-z0-9-]*$/);
@@ -129,6 +132,16 @@ describe('guide registry', () => {
     ]);
     for (const guide of GUIDES) {
       expect(guide.related.some((slug) => commercial.has(slug)), guide.slug).toBe(true);
+    }
+  });
+
+  it('every tool is reachable from at least one guide (reverse edge exists)', () => {
+    for (const tool of TOOLS) {
+      const referencing = GUIDES.filter((guide) => guide.related.includes(tool.slug));
+      // Not every tool needs a guide, but the five commercial ones do.
+      if (['compress-image', 'compress-image-to-size', 'convert-image'].includes(tool.slug)) {
+        expect(referencing.length, tool.slug).toBeGreaterThan(0);
+      }
     }
   });
 });

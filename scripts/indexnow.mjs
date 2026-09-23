@@ -56,11 +56,15 @@ if (keyFile) body.keyLocation = keyFile;
 
 const CODE_MEANINGS = {
   200: 'URLs submitted successfully',
+  202: 'URLs accepted — key validation pending (also a success)',
   400: 'Bad request format',
   403: 'Key not valid (hosted key file missing or mismatch)',
   422: 'URLs do not belong to the host, or key schema mismatch',
   429: 'Too many requests — stop and back off (spam protection)',
 };
+
+/** IndexNow answers 200 (already validated) or 202 (accepted, key pending) for a good submission. */
+const SUCCESS_CODES = new Set([200, 202]);
 
 try {
   const response = await fetch('https://api.indexnow.org/indexnow', {
@@ -71,8 +75,10 @@ try {
   const meaning = CODE_MEANINGS[response.status] ?? response.statusText;
   console.log(`IndexNow response: ${response.status} — ${meaning}`);
   console.log(`Submitted ${urls.length} URL(s) for host ${host}.`);
-  process.exit(response.status === 200 ? 0 : 1);
+  // Set the exit code instead of calling process.exit(): on Windows, exiting while
+  // undici closes its sockets trips a libuv assertion (observed 2026-09-19).
+  process.exitCode = SUCCESS_CODES.has(response.status) ? 0 : 1;
 } catch (error) {
   console.error('IndexNow request failed (no network?):', error instanceof Error ? error.message : error);
-  process.exit(1);
+  process.exitCode = 1;
 }

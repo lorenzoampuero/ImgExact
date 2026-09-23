@@ -7,6 +7,7 @@ import RelatedTools from '../components/RelatedTools.astro';
 import AdSlot from '../components/AdSlot.astro';
 import { softwareApplicationSchema, breadcrumbSchema, faqPageSchema } from '../seo/schema';
 import { linkifyToolMentions } from '../seo/linkify';
+import { GUIDES } from '../data/guides';
 import type { ToolEntry } from '../data/tools';
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
 }
 
 const { tool } = Astro.props;
+/** Guides that hand off to this tool — the reverse edge of guide.related. */
+const deeperGuides = GUIDES.filter((guide) => guide.related.includes(tool.slug));
 const schemas = [softwareApplicationSchema(tool), breadcrumbSchema(tool), faqPageSchema(tool.faq)];
 ---
 
@@ -79,6 +82,18 @@ const schemas = [softwareApplicationSchema(tool), breadcrumbSchema(tool), faqPag
           <ul>
             {tool.limitations.map((item) => <li>{item}</li>)}
           </ul>
+
+          {deeperGuides.length > 0 && (
+            <p class="small muted">
+              Go deeper:{' '}
+              {deeperGuides.map((guide, index) => (
+                <>
+                  {index > 0 && ' · '}
+                  <a href={`/guides/${guide.slug}`}>{guide.label}</a>
+                </>
+              ))}
+            </p>
+          )}
         </div>
       </div>
     </section>

@@ -35,6 +35,8 @@ export interface GuideSection {
 
 export interface GuideEntry {
   slug: string;
+  /** Short anchor label used when another page links to this guide. */
+  label: string;
   /** <title>, without the brand suffix (BaseLayout appends it). */
   title: string;
   h1: string;
@@ -59,6 +61,7 @@ export const GUIDES_REVIEWED_AT = '2026-09-22';
 export const GUIDES: GuideEntry[] = [
   {
     slug: 'image-compression-explained',
+    label: 'image compression explained',
     title: 'Image Compression Explained (Lossy, Lossless, Exact KB)',
     h1: 'Image compression explained: lossy, lossless, and why no tool can hit an exact KB',
     metaDescription:
@@ -141,6 +144,7 @@ export const GUIDES: GuideEntry[] = [
   },
   {
     slug: 'best-image-format-for-web',
+    label: 'which image format to use',
     title: 'WebP vs JPEG vs AVIF vs PNG: Which Format to Use',
     h1: 'Which image format to use: WebP vs JPEG vs AVIF vs PNG',
     metaDescription:
@@ -233,6 +237,7 @@ export const GUIDES: GuideEntry[] = [
   },
   {
     slug: 'free-image-compressor-alternatives',
+    label: 'choosing a free image compressor',
     title: 'Free Image Compressor Alternatives: How to Choose',
     h1: 'Free image compressor alternatives: what to check before you upload a file',
     metaDescription:
@@ -313,6 +318,7 @@ export const GUIDES: GuideEntry[] = [
   },
   {
     slug: 'image-size-vs-dimensions-explained',
+    label: 'image size vs dimensions vs DPI',
     title: 'Image Size vs Dimensions vs Resolution vs DPI',
     h1: 'Image size vs dimensions vs resolution vs DPI: what each one means',
     metaDescription:

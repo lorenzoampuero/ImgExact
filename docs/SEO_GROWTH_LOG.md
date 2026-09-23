@@ -44,9 +44,11 @@ guessing.
    Space the requests out; do not spam.
 2. **Bing Webmaster Tools** (`docs/BING_SETUP.md`): same, plus the IndexNow ping below.
 3. **IndexNow ping for the new URLs** (the key file is already live):
-   `npm run indexnow -- --host www.imgexact.site --key ffd3028e54d261a7ec9ebfb0667673b2 --key-file https://www.imgexact.site/ffd3028e54d261a7ec9ebfb0667673b2.txt --urls /guides,/guides/image-compression-explained,/guides/best-image-format-for-web,/guides/free-image-compressor-alternatives,/guides/image-size-vs-dimensions-explained`
+   `npm run indexnow -- --host www.imgexact.site --key ffd3028e54d261a7ec9ebfb0667673b2 --key-file https://www.imgexact.site/ffd3028e54d261a7ec9ebfb0667673b2.txt --urls https://www.imgexact.site/guides https://www.imgexact.site/guides/image-compression-explained https://www.imgexact.site/guides/best-image-format-for-web https://www.imgexact.site/guides/free-image-compressor-alternatives https://www.imgexact.site/guides/image-size-vs-dimensions-explained`
+   **Done 2026-09-22:** response `202 — Accepted` for all five URLs. Do not resubmit until the URL set changes again.
 4. **Confirm the live build**: `node scripts/prod-check.mjs --origin https://www.imgexact.site`
    (expect PASS with no trailing-slash warning — that warning only appears against local previews).
+   **Done 2026-09-22:** 23/23 PASS against production, zero warnings.
 
 ---
 
@@ -86,4 +88,5 @@ Anything that promises "1000 backlinks for $5" is a liability, not an asset.
 |---|---|---|---|
 | 2026-09-22 | Added keyword sections + problem-query FAQs to all 11 tool pages | Long-tail constraint queries ("compress image to 50 kb") start producing impressions before head terms | Pending — check after indexing |
 | 2026-09-22 | Published 4 guides + `/guides` hub | Informational queries feed the tools and earn the first links | Pending |
+| 2026-09-22 | Deployed the whole pass; `prod-check` 23/23 live; IndexNow accepted the 5 new URLs | New URLs get crawled without waiting for the next generic crawl | Accepted (202) same day |
 | 2026-09-22 | Rewrote titles/metas to include the constraint phrasing | Higher CTR on the impressions that do arrive | Pending |
