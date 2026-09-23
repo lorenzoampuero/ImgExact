@@ -6,6 +6,7 @@ import Faq from '../components/Faq.astro';
 import RelatedTools from '../components/RelatedTools.astro';
 import AdSlot from '../components/AdSlot.astro';
 import { softwareApplicationSchema, breadcrumbSchema, faqPageSchema } from '../seo/schema';
+import { linkifyToolMentions } from '../seo/linkify';
 import type { ToolEntry } from '../data/tools';
 
 interface Props {
@@ -37,8 +38,24 @@ const schemas = [softwareApplicationSchema(tool), breadcrumbSchema(tool), faqPag
         <div class="prose">
           <h2 id="how-heading">How it works</h2>
           <ol>
-            {tool.how.map((step) => <li>{step}</li>)}
+            {tool.how.map((step) => (
+              <li set:html={linkifyToolMentions(step, { skipSlug: tool.slug })} />
+            ))}
           </ol>
+
+          <h2 id="requirements-heading">Common requirements</h2>
+          <ul>
+            {tool.requirementPresets.map((preset) => (
+              <li>
+                <strong>{preset.values}</strong> — {preset.note}
+              </li>
+            ))}
+          </ul>
+
+          <h2 id="task-heading">{tool.taskGuide.heading}</h2>
+          {tool.taskGuide.body.map((paragraph) => (
+            <p set:html={linkifyToolMentions(paragraph, { skipSlug: tool.slug })} />
+          ))}
 
           <h2 id="formats-heading">Supported formats</h2>
           <p>{tool.accepts}</p>
@@ -53,7 +70,9 @@ const schemas = [softwareApplicationSchema(tool), breadcrumbSchema(tool), faqPag
 
           <h2 id="methodology-heading">Technical methodology</h2>
           <ul>
-            {tool.methodology.map((item) => <li>{item}</li>)}
+            {tool.methodology.map((item) => (
+              <li set:html={linkifyToolMentions(item, { skipSlug: tool.slug })} />
+            ))}
           </ul>
 
           <h2 id="limitations-heading">Known limitations</h2>

@@ -8,6 +8,7 @@
 
 import { SITE, absoluteUrl } from '../config/site';
 import type { ToolEntry, ToolFaq } from '../data/tools';
+import type { GuideEntry } from '../data/guides';
 
 export function webSiteSchema(): object {
   return {
@@ -26,6 +27,8 @@ export function organizationSchema(): object {
     '@type': 'Organization',
     name: SITE.name,
     url: SITE.url,
+    description: SITE.description,
+    logo: absoluteUrl('/logo.svg'),
   };
 }
 
@@ -48,23 +51,46 @@ export function softwareApplicationSchema(tool: ToolEntry): object {
 }
 
 export function breadcrumbSchema(tool: ToolEntry): object {
+  return breadcrumbList([
+    { name: 'Home', path: '/' },
+    { name: tool.name, path: `/${tool.slug}` },
+  ]);
+}
+
+/** Generic BreadcrumbList — every crumb carries a real URL (no virtual levels). */
+export function breadcrumbList(items: { name: string; path: string }[]): object {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: absoluteUrl('/'),
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: tool.name,
-        item: absoluteUrl(`/${tool.slug}`),
-      },
-    ],
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
+  };
+}
+
+/**
+ * Article structured data for guides. No author person is invented: the
+ * publisher entity is the site itself, exactly as on the about page.
+ */
+export function guideSchema(guide: GuideEntry): object {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: guide.h1,
+    description: guide.metaDescription,
+    datePublished: guide.published,
+    dateModified: guide.lastReviewed,
+    inLanguage: SITE.locale,
+    mainEntityOfPage: absoluteUrl(`/guides/${guide.slug}`),
+    author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE.name,
+      logo: { '@type': 'ImageObject', url: absoluteUrl('/logo.svg') },
+    },
   };
 }
 

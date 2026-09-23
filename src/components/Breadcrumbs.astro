@@ -1,14 +1,17 @@
 ---
 interface Props {
   name: string;
+  /** Optional middle crumb (e.g. Guides) — must point at a real page. */
+  parent?: { name: string; href: string };
 }
 
-const { name } = Astro.props;
+const { name, parent } = Astro.props;
 ---
 
 <nav class="breadcrumbs" aria-label="Breadcrumb">
   <ol>
     <li><a href="/">Home</a></li>
+    {parent && <li><a href={parent.href}>{parent.name}</a></li>}
     <li aria-current="page">{name}</li>
   </ol>
 </nav>

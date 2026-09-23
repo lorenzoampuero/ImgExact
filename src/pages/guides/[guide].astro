@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import Faq from '../../components/Faq.astro';
+import { GUIDES, getGuide } from '../../data/guides';
+import { TOOL_MAP, type ToolEntry } from '../../data/tools';
+import { linkifyToolMentions } from '../../seo/linkify';
+import { breadcrumbList, guideSchema, faqPageSchema } from '../../seo/schema';
+
+export function getStaticPaths() {
+  return GUIDES.map((guide) => ({ params: { guide: guide.slug } }));
+}
+
+const { guide: slug } = Astro.params;
+const guide = getGuide(slug!);
+if (!guide) throw new Error(`Unknown guide: ${slug}`);
+
+const tools = guide.related
+  .map((toolSlug) => TOOL_MAP.get(toolSlug))
+  .filter((tool): tool is ToolEntry => Boolean(tool));
+
+const schemas = [
+  guideSchema(guide),
+  breadcrumbList([
+    { name: 'Home', path: '/' },
+    { name: 'Guides', path: '/guides' },
+    { name: guide.h1, path: `/guides/${guide.slug}` },
+  ]),
+  faqPageSchema(guide.faq),
+];
+---
+
+<BaseLayout title={guide.title} description={guide.metaDescription} path={`/guides/${guide.slug}`} schemas={schemas}>
+  <div class="container tool-hero">
+    <Breadcrumbs name={guide.h1} parent={{ name: 'Guides', href: '/guides' }} />
+    <h1>{guide.h1}</h1>
+    <p class="tool-sub">{guide.metaDescription}</p>
+    <p class="xsmall muted">
+      Published and last reviewed <time datetime={guide.lastReviewed}>{guide.lastReviewed}</time> ·
+      Independent explainer — sources are linked, and nothing here is an endorsement.
+    </p>
+  </div>
+
+  <div class="container section">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <div class="prose">
+        {guide.sections.map((section) => (
+          <>
+            <h2>{section.heading}</h2>
+            {section.paragraphs.map((paragraph) => (
+              <p set:html={linkifyToolMentions(paragraph)} />
+            ))}
+            {section.list && (
+              <ul>
+                {section.list.map((item) => (
+                  <li set:html={linkifyToolMentions(item)} />
+                ))}
+              </ul>
+            )}
+            {section.table && (
+              <div class="table-wrap" tabindex="0" role="region" aria-label={`${section.heading} — table`}>
+                <table class="table">
+                  <thead>
+                    <tr>{section.table.columns.map((column) => <th scope="col">{column}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {section.table.rows.map((row) => (
+                      <tr>
+                        {row.map((cell, index) => (
+                          index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        ))}
+
+        <h2>Sources</h2>
+        <ul>
+          {guide.sources.map((source) => (
+            <li>
+              <a href={source.url} rel="noopener nofollow">{source.label}</a>
+            </li>
+          ))}
+        </ul>
+        <p class="small muted">
+          Specifications and platform behaviour change. Values on this page were reviewed on{' '}
+          <time datetime={guide.lastReviewed}>{guide.lastReviewed}</time>; if a source contradicts
+          this page, the source wins — and the correction belongs in the
+          <a href="https://github.com/lorenzoampuero/ImgExact/issues" rel="noopener">issue tracker</a>.
+        </p>
+      </div>
+    </div>
+
+    <section class="related-tools" aria-labelledby="guide-tools-heading">
+      <h2 id="guide-tools-heading">Put it to work</h2>
+      <div class="tool-grid" style="max-width: 720px;">
+        {tools.map((tool) => <ToolCard tool={tool} />)}
+      </div>
+    </section>
+  </div>
+
+  <Faq faq={guide.faq} />
+</BaseLayout>

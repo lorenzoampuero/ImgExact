@@ -1,6 +1,9 @@
 /* ==========================================================================
    ImgExact — design system
    Light-first. Tool is the hero. No gradients, no glassmorphism, no glow.
+   Accent: deep teal ("ink teal") — deliberately not the default UI blue that
+   every other converter site uses. Contrast of every token pair is verified by
+   `npm run contrast` (scripts/check-contrast.mjs).
    ========================================================================== */
 
 :root {
@@ -12,13 +15,13 @@
   --text-secondary: #64748b;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --accent-solid: #2563eb;
-  --accent-solid-hover: #1d4ed8;
-  --accent-soft: #dbeafe;
-  --accent-border: #bfdbfe;
-  --accent-text: #1e40af;
+  --accent: #0b6e63;
+  --accent-hover: #08574e;
+  --accent-solid: #0b6e63;
+  --accent-solid-hover: #08574e;
+  --accent-soft: #e2f4f1;
+  --accent-border: #b7e2db;
+  --accent-text: #07514a;
   --on-accent: #ffffff;
   --success: #15803d;
   --success-soft: #dcfce7;
@@ -32,7 +35,7 @@
   --error-soft: #fee2e2;
   --error-border: #fecaca;
   --error-text: #991b1b;
-  --dropzone-hover: #fbfdff;
+  --dropzone-hover: #f6fdfb;
   --checker-a: #f1f5f9;
   --checker-b: #ffffff;
   --note-bg-info: #f7faff;
@@ -85,13 +88,13 @@
     --text-secondary: #a2b1c8;
     --border: #24304a;
     --border-strong: #3a4864;
-    --accent: #8ab4ff;
-    --accent-hover: #a9c9ff;
-    --accent-solid: #2563eb;
-    --accent-solid-hover: #1d4ed8;
-    --accent-soft: #17233d;
-    --accent-border: #24406e;
-    --accent-text: #bcd4ff;
+    --accent: #5ed3c4;
+    --accent-hover: #86e3d7;
+    --accent-solid: #0e7a6e;
+    --accent-solid-hover: #0b655b;
+    --accent-soft: #0f2a2b;
+    --accent-border: #1d4a49;
+    --accent-text: #9fe6dc;
     --on-accent: #ffffff;
     --success: #4ade80;
     --success-soft: #10271b;
@@ -105,7 +108,7 @@
     --error-soft: #2a1516;
     --error-border: #6b2222;
     --error-text: #fca5a5;
-    --dropzone-hover: #16213a;
+    --dropzone-hover: #132a2c;
     --checker-a: #1a2438;
     --checker-b: #121a2b;
     --note-bg-info: #0f1b30;
@@ -947,6 +950,81 @@ table.table {
   color: var(--text-secondary);
 }
 .compare__range { width: 100%; accent-color: var(--accent); }
+
+/* --------------------------------------------------------------------------
+   Hero example (real sample file) & guide cards
+   -------------------------------------------------------------------------- */
+
+.hero-example {
+  margin: var(--sp-6) 0 0;
+  max-width: 680px;
+}
+.hero-example__stage {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface-2);
+  box-shadow: var(--shadow);
+}
+.hero-example__stage img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.hero-example__stats {
+  position: absolute;
+  inset: auto var(--sp-3) var(--sp-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.hero-example__chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(11, 17, 32, 0.82);
+  color: #f8fafc;
+}
+.hero-example__chip--after {
+  background: var(--accent-solid);
+  color: var(--on-accent);
+}
+.hero-example figcaption {
+  margin-top: var(--sp-2);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.guide-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--sp-3);
+  align-items: start;
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+.guide-card:hover {
+  text-decoration: none;
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+.guide-card:active { transform: translateY(0); }
+.guide-card__title { display: block; font-weight: 650; letter-spacing: -0.01em; }
+.guide-card__desc {
+  display: block;
+  margin-top: var(--sp-1);
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+.guide-card__arrow { color: var(--text-secondary); }
 
 /* Result reveal (disabled by the reduced-motion rule above) */
 @keyframes rise {

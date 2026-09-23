@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
 import { absoluteUrl } from '../config/site';
 import { TOOLS, LAST_REVIEWED } from '../data/tools';
+import { GUIDES } from '../data/guides';
 
 /**
- * Sitemap — canonical public URLs only:
- * homepage, tool pages, and the three trust pages. 404 is excluded (noindex).
+ * Sitemap — canonical public URLs only: homepage, tool pages, guides and the
+ * three trust pages. 404 is excluded (noindex).
  */
 export const GET: APIRoute = () => {
   const urls: Array<{ loc: string; lastmod: string; priority: string }> = [
@@ -13,6 +14,12 @@ export const GET: APIRoute = () => {
       loc: absoluteUrl(`/${tool.slug}`),
       lastmod: tool.lastReviewed,
       priority: '0.9',
+    })),
+    { loc: absoluteUrl('/guides'), lastmod: GUIDES[0]?.lastReviewed ?? LAST_REVIEWED, priority: '0.7' },
+    ...GUIDES.map((guide) => ({
+      loc: absoluteUrl(`/guides/${guide.slug}`),
+      lastmod: guide.lastReviewed,
+      priority: '0.7',
     })),
     { loc: absoluteUrl('/about'), lastmod: LAST_REVIEWED, priority: '0.3' },
     { loc: absoluteUrl('/privacy'), lastmod: LAST_REVIEWED, priority: '0.3' },

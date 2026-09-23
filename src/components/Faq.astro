@@ -1,5 +1,6 @@
 ---
 import type { ToolFaq } from '../data/tools';
+import { linkifyToolMentions } from '../seo/linkify';
 
 interface Props {
   faq: ToolFaq[];
@@ -15,7 +16,7 @@ const { faq } = Astro.props;
       {faq.map((item) => (
         <details>
           <summary>{item.q}</summary>
-          <p>{item.a}</p>
+          <p set:html={linkifyToolMentions(item.a)} />
         </details>
       ))}
     </div>

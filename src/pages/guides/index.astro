@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import GuideCard from '../../components/GuideCard.astro';
+import { GUIDES, GUIDES_REVIEWED_AT } from '../../data/guides';
+import { breadcrumbList, webSiteSchema, organizationSchema } from '../../seo/schema';
+
+const title = 'Image guides — formats, compression, sizes and DPI';
+const description =
+  'Explainers for the parts image tools usually skip: how compression works, which format to use, how to judge a free compressor and what DPI really means.';
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path="/guides"
+  schemas={[webSiteSchema(), organizationSchema(), breadcrumbList([{ name: 'Home', path: '/' }, { name: 'Guides', path: '/guides' }])]}
+>
+  <div class="container tool-hero">
+    <Breadcrumbs name="Guides" />
+    <h1>Image guides</h1>
+    <p class="tool-sub">
+      Tool pages do the work. These pages explain the decisions behind it — what compression
+      removes, which format to send, how to judge a compressor, and which number a form actually
+      wants. Every claim is dated and sourced.
+    </p>
+  </div>
+
+  <div class="container section">
+    <div class="tool-grid">
+      {GUIDES.map((guide) => <GuideCard guide={guide} />)}
+    </div>
+    <p class="small muted" style="margin-top: var(--sp-6);">
+      All guides reviewed {GUIDES_REVIEWED_AT}. Corrections are tracked in the
+      <a href="https://github.com/lorenzoampuero/ImgExact/issues" rel="noopener">public repository</a>.
+    </p>
+  </div>
+</BaseLayout>

@@ -21,6 +21,8 @@
 2. Confirm: indexable, canonical = itself, mobile-friendly render, no blocked resources.
 3. *Request indexing* once.
 
+> **2026-09-22:** the sitemap now contains **20 URLs** (11 tools + homepage + 4 guides + `/guides` + 3 trust pages). After any content push, request indexing for the *changed* URLs only — in this pass that means `/guides` and the four guide pages — and run the IndexNow ping (`docs/SEO_GROWTH_LOG.md`, operator checklist).
+
 ## 4. Inspect major tools (one by one)
 
 For `/compress-image-to-size`, `/resize-image`, `/convert-image`, `/crop-image`, plus the top secondary tools:
@@ -60,6 +62,12 @@ Filter *Queries* by these exact strings (derived from `research/KEYWORD_MAP.md`)
 | `remove exif data` | `/image-metadata` |
 | `300 dpi converter` | `/image-dpi` |
 | `image to base64` | `/image-to-base64` |
+| `compress image without losing quality` | `/compress-image` |
+| `image too large to upload` | `/compress-image-to-size` |
+| `how image compression works` | `/guides/image-compression-explained` |
+| `webp vs jpeg` | `/guides/best-image-format-for-web` |
+| `free image compressor alternatives` | `/guides/free-image-compressor-alternatives` |
+| `image size vs dimensions` | `/guides/image-size-vs-dimensions-explained` |
 
 ## 6. Change discipline
 

@@ -16,6 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "fixtures": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-fixtures.ps1 && node scripts/make-fixtures.mjs",
+    "brand": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-brand-assets.ps1",
+    "contrast": "node scripts/check-contrast.mjs",
     "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {

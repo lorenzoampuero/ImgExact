@@ -38,8 +38,23 @@ const PAGES = [
   '/convert-image',
   '/crop-image',
   '/image-to-base64',
+  '/guides',
+  '/guides/image-compression-explained',
 ];
-const EXPECTED_SITEMAP_URLS = 15;
+const EXPECTED_SITEMAP_URLS = 20;
+
+/** Server-rendered keyword guard: these phrases must exist in the HTML the crawler gets. */
+const KEYWORD_GUARD = [
+  ['/compress-image-to-size', 'compress image to 50 kb'],
+  ['/resize-image', 'resize image to 600x600'],
+  ['/convert-image', 'convert png to jpg'],
+  ['/image-size-checker', 'check image dimensions'],
+  ['/image-metadata', 'remove exif data'],
+  ['/compress-image-to-size', 'common requirements'],
+];
+
+/** Brand and hero assets that must resolve (they are referenced from the HTML). */
+const ASSETS = ['/logo.svg', '/apple-touch-icon.png', '/site.webmanifest', '/samples/example-photo-800w.jpg'];
 
 let checks = 0;
 let failures = 0;
@@ -80,6 +95,8 @@ async function checkPage(path) {
     if (h1Count !== 1) problems.push(`${h1Count} <h1> tag(s)`);
     if (!body.includes('application/ld+json')) problems.push('no JSON-LD');
     if (!/<title>[^<]+<\/title>/.test(body)) problems.push('no <title>');
+    if (!body.includes('property="og:image:alt"')) problems.push('no og:image:alt');
+    if (!body.includes('property="og:locale"')) problems.push('no og:locale');
     report(problems.length === 0, path, problems.join('; '));
   } catch (err) {
     report(false, path, `fetch failed: ${err.message}`);
@@ -221,6 +238,62 @@ async function checkNoInlineScripts() {
   }
 }
 
+/** The declared target phrases must be in the served HTML, not in a script bundle. */
+async function checkRenderedKeywords() {
+  for (const [path, phrase] of KEYWORD_GUARD) {
+    try {
+      const { status, body } = await fetchText(`${base}${path}`);
+      const problems = [];
+      if (status !== 200) problems.push(`status ${status}`);
+      if (!body.toLowerCase().includes(phrase)) problems.push(`"${phrase}" not in the served HTML`);
+      report(problems.length === 0, `${path} keyword: ${phrase}`, problems.join('; '));
+    } catch (err) {
+      report(false, `${path} keyword: ${phrase}`, `fetch failed: ${err.message}`);
+    }
+  }
+}
+
+async function checkAssets() {
+  const problems = [];
+  for (const asset of ASSETS) {
+    try {
+      const res = await fetch(`${base}${asset}`, {
+        redirect: 'follow',
+        signal: AbortSignal.timeout(15000),
+        headers: { 'user-agent': 'ImgExact-prod-check/1.0' },
+      });
+      if (res.status !== 200) problems.push(`${asset} → ${res.status}`);
+    } catch (err) {
+      problems.push(`${asset} → ${err.message}`);
+    }
+  }
+  report(problems.length === 0, 'brand & hero assets', problems.join('; '));
+}
+
+/**
+ * /slug/ must not serve a duplicate of /slug. Vercel applies `trailingSlash: false`;
+ * a local preview cannot, so that case is reported as a warning rather than a failure.
+ */
+async function checkTrailingSlash() {
+  try {
+    const res = await fetch(`${base}/resize-image/`, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(15000),
+      headers: { 'user-agent': 'ImgExact-prod-check/1.0' },
+    });
+    if (res.status >= 300 && res.status < 400) {
+      report(true, 'trailing slash redirect', `${res.status} → ${res.headers.get('location') ?? ''}`);
+    } else {
+      warn(
+        'trailing slash redirect',
+        `/resize-image/ returned ${res.status}; expected a redirect on Vercel (trailingSlash: false) — local previews cannot do this`,
+      );
+    }
+  } catch (err) {
+    warn('trailing slash redirect', `fetch failed: ${err.message}`);
+  }
+}
+
 console.log(`ImgExact production check — expected origin: ${origin}`);
 console.log(`Fetching from: ${base}\n`);
 
@@ -231,6 +304,9 @@ for (const path of PAGES) {
 await checkRobots();
 await checkSitemap();
 await checkFaqSchema();
+await checkRenderedKeywords();
+await checkAssets();
+await checkTrailingSlash();
 await checkAnalytics();
 await checkNoInlineScripts();
 

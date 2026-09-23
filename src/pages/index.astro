@@ -1,15 +1,33 @@
 ---
+import { existsSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ToolCard from '../components/ToolCard.astro';
+import GuideCard from '../components/GuideCard.astro';
 import TrustStrip from '../components/TrustStrip.astro';
 import AdSlot from '../components/AdSlot.astro';
 import { SITE } from '../config/site';
 import { TOOLS, TOOL_CATEGORIES, HOMEPAGE_ORDER } from '../data/tools';
+import { GUIDES } from '../data/guides';
 import { webSiteSchema, organizationSchema, faqPageSchema } from '../seo/schema';
 
 const bySlug = new Map(TOOLS.map((t) => [t.slug, t]));
 const popular = HOMEPAGE_ORDER.map((slug) => bySlug.get(slug)).filter((t): t is NonNullable<typeof t> => Boolean(t));
 const title = `${SITE.name} — Make any image fit the exact requirement`;
+
+/**
+ * Hero example — real files in public/samples, measured at build time.
+ * The caption states what actually happened to that file: no invented numbers.
+ * (Regenerate the pair with `npm run brand`.)
+ */
+function sample(publicPath: string) {
+  const file = join(process.cwd(), 'public', publicPath);
+  return existsSync(file) ? { publicPath, bytes: statSync(file).size } : null;
+}
+const beforeSample = sample('/samples/example-photo.jpg');
+const afterSample = sample('/samples/example-photo-800w.jpg');
+const formatKb = (bytes: number) => `${Math.max(1, Math.round(bytes / 1024))} KB`;
+const heroSampleReady = Boolean(beforeSample && afterSample);
 
 /** Site-level questions answered honestly — also emitted as FAQPage data below. */
 const HOME_FAQ = [
@@ -54,9 +72,15 @@ const HOME_FAQ = [
     </div>
     <h1>Make any image fit the exact requirement.</h1>
     <p class="hero__sub">
-      Resize, compress, convert and prepare images directly in your browser — to an exact KB, an
-      exact pixel size, or a specific platform format. Your files never leave your device.
+      Free image tools online that run entirely in your browser — resize, compress, convert and
+      prepare images to an exact KB, an exact pixel size or a specific platform format. Nothing is
+      uploaded: your files never leave your device.
     </p>
+
+    <div class="hero__cta">
+      <a class="btn btn--primary btn--lg" href="/compress-image-to-size">Compress an image to 50 KB</a>
+      <a class="btn btn--secondary btn--lg" href="/resize-image">Resize to exact pixels</a>
+    </div>
 
     <div class="dropzone" data-home-dropzone tabindex="0" role="button" aria-label="Drop an image to identify it and pick the right tool">
       <p class="dropzone__title">Drop an image to get started</p>
@@ -75,6 +99,31 @@ const HOME_FAQ = [
     <div data-home-output hidden style="margin-top: var(--sp-4);"></div>
 
     <TrustStrip />
+
+    {heroSampleReady && beforeSample && afterSample && (
+      <figure class="hero-example">
+        <div class="hero-example__stage">
+          <img
+            src={afterSample.publicPath}
+            width="800"
+            height="533"
+            loading="eager"
+            decoding="async"
+            alt={`Example photo resized from 2400×1600 to 800×533 pixels and compressed to ${formatKb(afterSample.bytes)} in the browser`}
+          />
+          <div class="hero-example__stats">
+            <span class="hero-example__chip">Original 2400×1600 · {formatKb(beforeSample.bytes)}</span>
+            <span class="hero-example__chip hero-example__chip--after">Result 800×533 · {formatKb(afterSample.bytes)}</span>
+          </div>
+        </div>
+        <figcaption>
+          Same photo, one browser tab, no upload: resized to the pixels that were actually needed
+          and re-encoded to {formatKb(afterSample.bytes)}. Every tool reports its numbers this way —
+          including when a target cannot be met.
+        </figcaption>
+      </figure>
+    )}
+
     <p class="hero__browse">
       <a href="#tools">Browse all {TOOLS.length} tools ↓</a>
     </p>
@@ -115,7 +164,7 @@ const HOME_FAQ = [
       const list = popular.filter((t) => t.category === cat.id);
       return list.length > 0 ? (
         <div>
-          <p class="category-title">{cat.label}</p>
+          <h3 class="category-title">{cat.label}</h3>
           <div class="tool-grid">
             {list.map((t) => <ToolCard tool={t} />)}
           </div>
@@ -144,6 +193,18 @@ const HOME_FAQ = [
           <a href="/resize-image">resize to exact pixels</a>. Both take seconds and work offline
           once the page is loaded.
         </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="container container--narrow" style="padding-inline: 0;">
+      <div class="section-head">
+        <h2 id="guides-heading">Guides</h2>
+        <p>Explainers for the parts that image tools usually skip — written by the same people who built them.</p>
+      </div>
+      <div class="tool-grid">
+        {GUIDES.map((guide) => <GuideCard guide={guide} />)}
       </div>
     </div>
   </section>

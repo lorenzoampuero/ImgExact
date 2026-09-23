@@ -1,6 +1,6 @@
 # KEYWORD MAP — Exact Image Toolkit
 
-**Status:** Gate 0 artifact · **Last updated:** 2026-09-19
+**Status:** Gate 0 artifact · **Last updated:** 2026-09-22 (keyword-rendering pass + guide layer)
 **Rule of this document:** One primary search intent → one canonical URL. Numeric variants live inside tools as inputs, never as URLs.
 
 > **Volume disclaimer:** No keyword-volume API was available during research. Every "volume signal" below is either (a) derived from third-party traffic estimators of the pages that currently rank (HypeStat/SEMrush/SimilarWeb resale, retrieved 2026-09-19), (b) official documentation evidence, or (c) clearly labeled knowledge-based estimates. Nothing here is a verified search volume. Difficulty signals are qualitative.
@@ -157,6 +157,23 @@
 | `404` | — | Helpful recovery links to top tools |
 
 No blog at launch (project rule). Any future guide pages must target distinct informational intent not served by tool pages (e.g., deep explainers), and be registered in `docs/SEO_PAGE_REGISTRY.md` before creation.
+
+### 2.1 Guide layer (added 2026-09-22)
+
+The transactional pages above are where a task finishes; these pages own the *informational* intent that precedes it. Each records its intent and its anti-cannibalization rationale in `src/data/guides.ts` (asserted by `tests/guides.test.ts`).
+
+| URL | Owns (informational intent) | Hands off to |
+|---|---|---|
+| `/guides/image-compression-explained` | how compression works, what quality settings mean, why an exact KB is impossible | both compressors |
+| `/guides/best-image-format-for-web` | which format to use (WebP vs JPEG vs AVIF vs PNG) | `/convert-image` |
+| `/guides/free-image-compressor-alternatives` | how to choose between compressors (upload vs local) | `/compress-image-to-size` |
+| `/guides/image-size-vs-dimensions-explained` | bytes vs pixels vs megapixels vs DPI/PPI terminology | size checker, DPI tool |
+
+A guide may never take a transactional phrase: "compress image to 50 kb" belongs to `/compress-image-to-size` and is enforced by the keyword-coverage test.
+
+### 2.2 Rendering rule (new, enforced)
+
+A phrase listed in `research/KEYWORD_MAP.md` is only a real target when it is **rendered on the page**. Every tool now declares its target phrases in `src/data/tools.ts` (`keywords`) and the test suite fails the build if one of them is missing from the rendered text. The unused `searchIntent` field is documentation, not a keyword — it never reaches the HTML.
 
 ---
 
